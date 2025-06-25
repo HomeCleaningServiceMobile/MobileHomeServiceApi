@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileHomeServiceApi", "MobileHomeServiceApi\MobileHomeServiceApi.csproj", "{62A857E4-E250-4908-B899-18031E8BD28E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MHS.Common", "MHS.Common\MHS.Common.csproj", "{A1B2C3D4-E5F6-7890-1234-567890ABCDEF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MHS.Repository", "MHS.Repository\MHS.Repository.csproj", "{7A5E8CE4-F616-45C3-BDC1-A65EECBAEB7C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MHS.Service", "MHS.Service\MHS.Service.csproj", "{62B9EC3D-2540-4DE3-AF9A-7E79F664B41A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{62A857E4-E250-4908-B899-18031E8BD28E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62A857E4-E250-4908-B899-18031E8BD28E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62A857E4-E250-4908-B899-18031E8BD28E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62A857E4-E250-4908-B899-18031E8BD28E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-1234-567890ABCDEF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-1234-567890ABCDEF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1B2C3D4-E5F6-7890-1234-567890ABCDEF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1B2C3D4-E5F6-7890-1234-567890ABCDEF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A5E8CE4-F616-45C3-BDC1-A65EECBAEB7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A5E8CE4-F616-45C3-BDC1-A65EECBAEB7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A5E8CE4-F616-45C3-BDC1-A65EECBAEB7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A5E8CE4-F616-45C3-BDC1-A65EECBAEB7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62B9EC3D-2540-4DE3-AF9A-7E79F664B41A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62B9EC3D-2540-4DE3-AF9A-7E79F664B41A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62B9EC3D-2540-4DE3-AF9A-7E79F664B41A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62B9EC3D-2540-4DE3-AF9A-7E79F664B41A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
