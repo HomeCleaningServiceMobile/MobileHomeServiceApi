@@ -503,6 +503,302 @@ graph TD
 
 ---
 
+## 🏠 Service vs Service Package Explained
+
+### **Service (Main Category)**
+A **Service** represents the **main category** of work that can be performed. Think of it as the broad service offering:
+
+```
+🧹 House Cleaning Service
+├── BasePrice: $50.00
+├── HourlyRate: $25.00  
+├── EstimatedDuration: 180 minutes
+├── Requirements: "Access to cleaning supplies, water, electricity"
+└── Restrictions: "No hazardous materials"
+```
+
+**Service Properties:**
+- **Name & Description**: What the service is about
+- **ServiceType**: Enum categorization (HouseCleaning, Cooking, etc.)
+- **BasePrice**: Starting price for the service
+- **HourlyRate**: Additional hourly charges (optional)
+- **EstimatedDuration**: Expected time to complete
+- **Requirements**: What customer needs to provide
+- **Restrictions**: Service limitations
+
+### **Service Packages (Specific Offerings)**
+**Service Packages** are **specific offerings** within each service category, providing different levels of service:
+
+```
+🧹 House Cleaning Service
+├── 📦 Basic Package
+│   ├── Name: "House Cleaning - Basic Package"
+│   ├── Price: $50.00
+│   ├── Duration: 180 minutes
+│   └── Included: "Dusting, vacuuming, mopping"
+│
+├── 📦 Premium Package
+│   ├── Name: "House Cleaning - Premium Package" 
+│   ├── Price: $75.00
+│   ├── Duration: 240 minutes
+│   └── Included: "Basic + windows, oven, refrigerator"
+│
+└── 📦 Deep Clean Package
+    ├── Name: "House Cleaning - Deep Clean Package"
+    ├── Price: $100.00
+    ├── Duration: 300 minutes
+    └── Included: "Premium + carpet cleaning, garage"
+```
+
+**ServicePackage Properties:**
+- **Name & Description**: Specific package details
+- **Price**: Fixed price for this package
+- **DurationMinutes**: Expected completion time
+- **IncludedItems**: What's included in this package
+- **SortOrder**: Display order in app
+
+### **Real-World Examples:**
+
+**🧹 House Cleaning Service:**
+- Basic Package ($50, 3h): Dusting, vacuuming, mopping
+- Premium Package ($75, 4h): Basic + windows + appliances  
+- Deep Clean Package ($100, 5h): Premium + carpets + garage
+
+**👨‍🍳 Cooking Service:**
+- Meal Prep Basic ($40, 2h): 3 meals prepared
+- Dinner Party ($80, 4h): 3-course meal + table service
+- Weekly Meal Plan ($120, 6h): 7 days worth of meals
+
+**🧺 Laundry Service:**
+- Quick Wash ($20, 1h): Wash + dry + fold
+- Premium Care ($30, 1.5h): Delicate handling + ironing
+- Bulk Service ($40, 2h): Large loads + pickup/delivery
+
+### **Booking Relationship:**
+```
+Customer Booking Process:
+1. Browse Services → Select "House Cleaning"
+2. Choose Package → Select "Premium Package ($75)"
+3. Book Service → Creates booking with ServiceId + ServicePackageId
+4. Payment → Uses ServicePackage.Price as base amount
+```
+
+---
+
+## 💰 Money Flow & Revenue Model
+
+### **📊 Pricing Structure**
+
+When a customer books a service, the pricing calculation follows this structure:
+
+```typescript
+// Example: House Cleaning Premium Package
+Booking Calculation:
+├── Base Package Price: $75.00
+├── Overtime Charges: $25.00/hour (if exceeds estimated time)
+├── Platform Fees: Included in package price
+├── Taxes: Calculated based on location
+└── Total Amount: Base + Overtime + Taxes
+```
+
+**Amount Fields in Booking:**
+- **TotalAmount**: Initial calculated price when booking is created
+- **FinalAmount**: Final price after service completion (includes overtime, adjustments)
+
+### **🔄 Complete Money Flow**
+
+```mermaid
+graph TD
+    A["👤 Customer<br/>Books Service Package<br/>$75"] --> B["💳 Payment Processing<br/>TotalAmount: $75"]
+    B --> C{"Payment Method"}
+    C -->|Cash| D["💵 Cash Payment<br/>Staff Collects On-Site"]
+    C -->|Electronic| E["🏦 Payment Gateway<br/>Stripe/PayPal/MoMo"]
+    
+    D --> F["✅ Payment Confirmed<br/>Status: Paid"]
+    E --> F
+    
+    F --> G["💰 Revenue Distribution"]
+    G --> H["📊 Platform Commission<br/>15% = $11.25"]
+    G --> I["👷 Staff Payment<br/>85% = $63.75"]
+    
+    H --> J["🏢 Platform Operations<br/>• Technology Development<br/>• Customer Support<br/>• Marketing"]
+    
+    I --> K["💳 Staff Payout<br/>• Weekly/Monthly Transfer<br/>• Bank Account<br/>• E-Wallet"]
+    
+    L["❌ Refund Scenarios"] --> M["🔄 Refund Processing"]
+    M --> N["👤 Customer Refund"]
+    M --> O["👷 Staff Deduction"]
+```
+
+### **📈 Revenue Model Breakdown**
+
+**Commission Structure:**
+| Component | Percentage | Amount (on $75) | Description |
+|-----------|------------|-----------------|-------------|
+| **Service Revenue** | 100% | $75.00 | Total customer payment |
+| **Platform Commission** | 15% | $11.25 | Platform operational costs |
+| **Payment Processing** | 3% | $2.25 | Gateway fees (deducted from platform) |
+| **Staff Payout** | 82% | $61.50 | Final staff earning |
+
+**Platform Revenue Streams:**
+1. **Service Commission**: 15-20% of each booking
+2. **Payment Processing**: Markup on gateway fees
+3. **Premium Subscriptions**: Enhanced features for staff
+4. **Advertising**: Promoted service listings
+5. **Surge Pricing**: Higher rates during peak demand
+
+### **💳 Payment Methods & Processing**
+
+**Supported Payment Methods:**
+```csharp
+public enum PaymentMethod
+{
+    Cash = 1,           // Staff collects at service location
+    CreditCard = 2,     // Visa, Mastercard via gateway
+    DebitCard = 3,      // Direct bank debit
+    BankTransfer = 4,   // Online banking transfer
+    EWallet = 5,        // MoMo, ZaloPay, GrabPay
+    QRCode = 6          // QR-based instant payments
+}
+```
+
+**Payment Processing Flow:**
+1. **Pre-Authorization**: Hold amount when booking is confirmed
+2. **Capture**: Charge customer after service completion
+3. **Settlement**: Distribute funds to platform and staff
+4. **Reconciliation**: Daily financial reporting and balancing
+
+### **🔄 Refund & Cancellation Policies**
+
+**Cancellation Timeline:**
+```mermaid
+graph TD
+    A["📋 Booking Created<br/>$75 Pre-authorized"] --> B{"Cancellation Time"}
+    
+    B -->|"24+ hours before"| C["💯 Full Refund<br/>$75 to customer<br/>$0 to staff"]
+    B -->|"2-24 hours before"| D["🔗 50% Refund<br/>$37.50 to customer<br/>$37.50 to staff"]
+    B -->|"Less than 2 hours"| E["❌ No Refund<br/>$0 to customer<br/>$75 to staff"]
+    B -->|"Service started"| F["❌ No Refund<br/>Full amount to staff"]
+    
+    G["🚨 Service Quality Issues"] --> H["📞 Customer Complaint"]
+    H --> I["🔍 Admin Investigation"]
+    I --> J{"Resolution Decision"}
+    J -->|"Staff Fault"| K["💯 Full Refund + Staff Penalty"]
+    J -->|"Mutual Issue"| L["🔗 Partial Refund"]
+    J -->|"Customer Fault"| M["❌ No Refund"]
+```
+
+**Refund Processing:**
+```csharp
+Payment Refund Fields:
+├── RefundAmount: Amount being refunded
+├── RefundReason: Reason for refund
+├── RefundedAt: Timestamp of refund
+└── RefundMethod: How refund is processed
+```
+
+### **💼 Business Scenarios**
+
+**Scenario A: Standard Successful Service**
+```
+1. Customer books "Premium House Cleaning" → $75 pre-authorized
+2. Staff arrives and completes service in 4 hours → No overtime
+3. Service completed successfully → $75 charged
+4. Revenue split: Platform $11.25 (15%) | Staff $63.75 (85%)
+5. Customer rates 5 stars → Service cycle complete
+```
+
+**Scenario B: Service with Overtime**
+```
+1. Customer books "Basic House Cleaning" → $50 (3 hours estimated)
+2. Service requires 4 hours → 1 hour overtime at $25/hour
+3. Staff requests overtime approval → Customer approves
+4. Final amount: $75 ($50 base + $25 overtime)
+5. Revenue split: Platform $11.25 | Staff $63.75
+```
+
+**Scenario C: Last-Minute Cancellation**
+```
+1. Customer books service → $75 pre-authorized
+2. Customer cancels 1 hour before service → 50% refund policy
+3. Refund processing: $37.50 back to customer
+4. Staff compensation: $37.50 (for reserved time slot)
+5. Platform keeps commission on non-refunded portion
+```
+
+**Scenario D: Service Quality Issue**
+```
+1. Service completed but customer unsatisfied → Complaint filed
+2. Admin reviews evidence (photos, staff report, customer feedback)
+3. Decision: Staff fault → Full refund + staff penalty
+4. Refund: $75 back to customer
+5. Staff penalty: Deduction from future earnings + training required
+```
+
+### **📊 Financial Tracking & Reporting**
+
+**Payment Record Structure:**
+```csharp
+Payment Entity:
+├── PaymentNumber: "PAY202312250001"        // Unique payment identifier
+├── BookingId: Links to specific booking
+├── Amount: $75.00                          // Total payment amount
+├── Method: PaymentMethod.CreditCard        // How customer paid
+├── Status: PaymentStatus.Paid              // Current payment status
+├── TransactionId: "TXN12345678"           // Internal transaction ID
+├── GatewayTransactionId: "GTW87654321"    // Payment gateway reference
+├── PaidAt: DateTime                       // When payment was processed
+├── RefundAmount: $0.00                    // Any refunded amount
+└── Notes: "Payment for Booking BK001"     // Additional information
+```
+
+**Financial Analytics:**
+- **Daily Revenue**: Total earnings by service type and region
+- **Staff Performance**: Individual earnings, ratings, and job completion rates
+- **Commission Optimization**: Analysis of pricing and commission rates
+- **Payment Method Trends**: Customer preferences and conversion rates
+- **Refund Analysis**: Patterns and reasons for refunds
+- **Operational Costs**: Platform expenses vs. revenue
+
+### **🔐 Financial Security & Compliance**
+
+**Security Measures:**
+- **PCI DSS Compliance**: Secure handling of card payment data
+- **Data Encryption**: All financial data encrypted in transit and at rest
+- **Fraud Detection**: AI-powered algorithms to detect suspicious transactions
+- **Two-Factor Authentication**: Additional security for high-value transactions
+- **Audit Trails**: Complete transaction history for compliance
+
+**Regulatory Compliance:**
+- **Tax Reporting**: Automatic tax calculation and reporting
+- **Anti-Money Laundering**: KYC verification for staff and high-value customers
+- **Consumer Protection**: Clear refund policies and dispute resolution
+- **Financial Licensing**: Compliance with local financial service regulations
+
+### **💡 Key Benefits**
+
+**For Customers:**
+✅ Transparent pricing with no hidden fees  
+✅ Multiple payment options for convenience  
+✅ Clear refund policies and protection  
+✅ Secure payment processing  
+
+**For Staff:**
+✅ Guaranteed payment for completed services  
+✅ Transparent earning structure  
+✅ Regular payout schedule  
+✅ Protection against fraudulent customers  
+
+**For Platform:**
+✅ Sustainable revenue model  
+✅ Automated financial processing  
+✅ Scalable commission structure  
+✅ Comprehensive financial reporting  
+
+This financial model ensures **trust**, **transparency**, and **sustainability** for all stakeholders in the mobile home service ecosystem.
+
+---
+
 ## 🗄️ Database Schema Overview
 
 ### **Core Entities**
