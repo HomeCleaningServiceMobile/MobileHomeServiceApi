@@ -107,6 +107,33 @@ graph TD
     H --> I[Service Available for Booking]
 ```
 
+**Detailed Steps:**
+1. **Service Creation**: Admin accesses service management panel
+2. **Basic Information**:
+   - Enter service name and description
+   - Select service type (HouseCleaning, Cooking, etc.)
+   - Upload service image/icon
+3. **Pricing Configuration**:
+   - Set base price for the service
+   - Configure hourly rate (if applicable)
+   - Define estimated duration in minutes
+4. **Requirements & Restrictions**:
+   - List equipment/materials needed
+   - Specify any restrictions or limitations
+   - Set special requirements for customers
+5. **Service Package Creation**:
+   - Create Basic package with standard features
+   - Create Premium package with additional services
+   - Set different pricing and duration for each package
+6. **Availability Settings**:
+   - Define service areas/regions
+   - Set operational hours
+   - Configure staff requirements
+7. **Activation**: 
+   - Review all configurations
+   - Activate service for customer booking
+   - Service appears in mobile app catalog
+
 ### **3. Customer Booking Flow**
 ```mermaid
 graph TD
@@ -142,6 +169,36 @@ graph TD
     I --> L[Customer Notification]
 ```
 
+**Detailed Steps:**
+1. **Trigger Auto-Assignment**: System activates when booking status = Pending
+2. **Staff Filtering Criteria**:
+   - Match required service skills
+   - Check availability on booking date/time
+   - Verify geographic proximity to service location
+   - Consider staff rating and experience level
+3. **Priority Algorithm**:
+   - Distance from service location (closest first)
+   - Staff rating and customer reviews
+   - Number of completed jobs
+   - Last assignment time (load balancing)
+4. **Notification Process**:
+   - Send push notification to selected staff
+   - Include booking details and location
+   - Set response deadline (typically 15-30 minutes)
+   - Update booking status to "AutoAssigned"
+5. **Staff Response Handling**:
+   - **Accept**: Update booking to "Confirmed", notify customer
+   - **Decline**: Log reason, find next available staff
+   - **No Response**: Auto-decline after deadline, find next staff
+6. **Fallback to Manual Assignment**:
+   - If no staff available, notify admin
+   - Admin can manually assign or reschedule
+   - System sends manual assignment notification
+7. **Confirmation**:
+   - Update booking status and timestamps
+   - Send confirmation to customer with staff details
+   - Add booking to staff's schedule
+
 ### **5. Service Execution Flow**
 ```mermaid
 graph TD
@@ -155,6 +212,44 @@ graph TD
     H --> I[Review & Rating]
     I --> J[Booking Closure]
 ```
+
+**Detailed Steps:**
+1. **Pre-Service Preparation**:
+   - Staff receives confirmed booking notification
+   - Review service requirements and customer instructions
+   - Prepare necessary equipment and materials
+   - Travel to customer location
+2. **Check-In Process**:
+   - Staff arrives at service location
+   - Verify GPS location matches booking address
+   - Take "arrival" photo for documentation
+   - Update booking status to "InProgress"
+   - Record actual start time
+3. **Service Execution**:
+   - Review service requirements with customer
+   - Clarify any special instructions
+   - Begin service work according to package specifications
+   - Follow safety protocols and quality standards
+4. **Progress Documentation**:
+   - Take before/during/after photos
+   - Upload images to booking record
+   - Add notes about work performed
+   - Document any issues or changes
+5. **Service Completion**:
+   - Complete all tasks in service package
+   - Clean up work area
+   - Review completed work with customer
+   - Address any customer concerns
+6. **Check-Out Process**:
+   - Take final completion photos
+   - Record actual end time
+   - Get customer approval/signature (if required)
+   - Update booking status to "Completed"
+7. **Post-Service**:
+   - System calculates final amount
+   - Generate service completion report
+   - Trigger payment processing
+   - Send completion notification to customer
 
 ### **6. Payment & Completion Flow**
 ```mermaid
@@ -170,6 +265,46 @@ graph TD
     H --> I[Staff Rating]
     I --> J[Booking Closure]
 ```
+
+**Detailed Steps:**
+1. **Amount Calculation**:
+   - Start with base service package price
+   - Add any extra time charges (if service exceeded estimated duration)
+   - Apply any additional service fees
+   - Calculate platform commission
+   - Apply discounts or promotions (if applicable)
+2. **Payment Method Selection**:
+   - Present customer with saved payment methods
+   - Allow selection of new payment method
+   - Support: Cash, Card, Bank Transfer, E-Wallet, QR Code
+3. **Payment Processing**:
+   - **Cash**: Staff collects payment, marks as paid
+   - **Electronic**: Process through payment gateway
+   - Generate unique transaction ID
+   - Update payment status in real-time
+4. **Payment Verification**:
+   - **Success**: Confirm payment received
+   - **Failure**: Retry mechanism with different method
+   - **Pending**: Monitor gateway response
+5. **Invoice Generation**:
+   - Create detailed invoice with service breakdown
+   - Include staff details and service completion photos
+   - Generate PDF invoice for customer records
+   - Send via email and in-app notification
+6. **Review & Rating Process**:
+   - Prompt customer to rate service (1-5 stars)
+   - Collect detailed ratings (Quality, Timeliness, Professionalism, Communication)
+   - Allow written feedback and comments
+   - Optional: Upload photos of completed work
+7. **Staff Compensation**:
+   - Calculate staff payment (service fee - platform commission)
+   - Update staff earnings and completed job count
+   - Process payment to staff account
+8. **Booking Finalization**:
+   - Archive booking as completed
+   - Update customer loyalty points
+   - Send completion summary to all parties
+   - Generate analytics data for reporting
 
 ---
 
