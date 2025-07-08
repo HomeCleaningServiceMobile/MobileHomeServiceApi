@@ -15,14 +15,14 @@
 ## 🎯 Project Overview
 
 ### **Purpose**
-The Mobile Home Service API is a comprehensive backend system designed to facilitate on-demand home services. It serves as the backend for a mobile application that connects customers needing home services with qualified service providers.
+The Mobile Home Service API is a comprehensive backend system designed for a **home service company** to manage their operations. It serves as the backend for a mobile application that allows customers to book services from the company's employed staff.
 
 ### **Main Objectives**
-- **Service Marketplace**: Platform for customers to book various home services
-- **Staff Management**: System for service providers to manage their work and availability
-- **Business Operations**: Administrative tools for managing the entire service ecosystem
-- **Payment Processing**: Handle transactions and financial operations
-- **Quality Assurance**: Review and rating system for service quality
+- **Service Management**: System for customers to book various home services from the company
+- **Employee Management**: Tools for managing company staff schedules and assignments
+- **Business Operations**: Administrative tools for managing company operations and finances
+- **Payment Processing**: Handle customer payments directly to the company
+- **Quality Assurance**: Review and rating system to maintain service quality standards
 
 ### **Service Types Available**
 - House Cleaning
@@ -337,54 +337,349 @@ graph TD
 6. **Payment**: Process payment after service completion
 7. **Feedback**: Rate and review the service provider
 
-### **Staff Journey**
+### **Employee Journey**
 ```mermaid
 graph TD
-    A[Registration & Verification] --> B[Profile Setup]
-    B --> C[Skill Certification]
-    C --> D[Schedule Management]
-    D --> E[Receive Booking Notifications]
-    E --> F[Accept/Decline Bookings]
-    F --> G[Service Execution]
-    G --> H[Check-In/Check-Out]
-    H --> I[Service Documentation]
-    I --> J[Payment Receipt]
+    A[Hiring & Onboarding] --> B[Profile Setup]
+    B --> C[Skill Training & Certification]
+    C --> D[Schedule Assignment]
+    D --> E[Receive Work Assignments]
+    E --> F[Service Execution]
+    F --> G[Check-In/Check-Out]
+    G --> H[Service Documentation]
+    H --> I[Performance Review]
 ```
 
 **Detailed Steps:**
-1. **Onboarding**: Registration with skill verification
-2. **Profile Setup**: Add services they can provide
-3. **Schedule Management**: Set availability and work hours
-4. **Booking Management**: 
-   - Receive auto-assignment notifications
-   - Accept/decline booking requests
-   - View upcoming schedules
-5. **Service Execution**:
-   - Check-in at customer location
-   - Perform required services
-   - Document work with photos
+1. **Hiring Process**: Company recruitment and background verification
+2. **Employee Onboarding**: Setup company profile and access credentials
+3. **Training & Certification**: Company-provided training on service standards
+4. **Schedule Management**: Assigned work hours and availability by managers
+5. **Work Assignment**: 
+   - Receive assigned bookings from management
+   - View daily/weekly work schedules
+   - Get customer and service details
+6. **Service Execution**:
+   - Check-in at customer location using company app
+   - Perform services according to company standards
+   - Document work with photos and notes
    - Check-out upon completion
-6. **Payment**: Receive compensation for completed services
+7. **Compensation**: Receive regular salary/hourly wages from company
 
-### **Admin Journey**
+### **Management Journey**
 ```mermaid
 graph TD
-    A[System Management] --> B[Service Management]
-    B --> C[Staff Management]
+    A[Company Operations] --> B[Service Management]
+    B --> C[Employee Management]
     C --> D[Booking Oversight]
-    D --> E[Manual Assignments]
-    E --> F[Payment Management]
+    D --> E[Employee Assignments]
+    E --> F[Financial Management]
     F --> G[Analytics & Reports]
-    G --> H[System Monitoring]
+    G --> H[Quality Control]
 ```
 
 **Detailed Steps:**
-1. **Service Management**: Create/update/deactivate services
-2. **Staff Management**: Onboard staff, verify skills, monitor performance
-3. **Booking Oversight**: Monitor all bookings, resolve issues
-4. **Manual Assignment**: Assign staff when auto-assignment fails
-5. **Payment Management**: Handle payments, refunds, disputes
-6. **System Analytics**: Generate reports and monitor KPIs
+1. **Service Management**: Create/update company service offerings and pricing
+2. **Employee Management**: Hire employees, manage schedules, monitor performance
+3. **Booking Oversight**: Monitor all customer bookings and service delivery
+4. **Employee Assignment**: Assign employees to bookings based on skills and availability
+5. **Financial Management**: Track company revenue, costs, and employee compensation
+6. **Business Analytics**: Generate reports on revenue, employee performance, and customer satisfaction
+
+---
+
+## 👥 Use Cases by Role
+
+### **🧑‍💼 Customer Use Cases**
+
+**Authentication & Profile Management**
+- Register new customer account
+- Login/logout from mobile app
+- Update personal profile information
+- Change password
+- Reset forgotten password
+- Manage saved addresses (home, office, etc.)
+- Set up and manage payment methods
+- View and update emergency contact information
+
+**Service Discovery & Booking**
+- Browse available home services
+- Filter services by type, price, availability
+- View service details and pricing packages
+- Select service packages (Basic, Premium, etc.)
+- Choose appointment date and time slots
+- Select or add new service address
+- Add special instructions for service
+- Review booking summary and total cost
+- Confirm booking and make payment
+
+**Booking Management**
+- View current upcoming bookings
+- View booking history and past services
+- Track real-time booking status
+- Receive notifications about booking updates
+- Cancel bookings (with refund policies)
+- Reschedule existing bookings
+- Add notes or update special instructions
+- Contact assigned employee through app
+
+**Payment & Billing**
+- Make payments for completed services
+- View payment history and invoices
+- Process refunds for cancelled services
+- Update payment methods
+- Apply discount codes or promotions
+- Set up automatic payment for recurring services
+- View billing statements and receipts
+
+**Service Tracking & Communication**
+- Track employee arrival and service progress
+- Receive real-time service status updates
+- View employee profile and ratings
+- Communicate with employee during service
+- Approve overtime charges if service runs long
+- Confirm service completion
+- Report issues or complaints
+
+**Reviews & Feedback**
+- Rate completed services (1-5 stars)
+- Provide detailed reviews (quality, timeliness, professionalism)
+- Write comments and feedback
+- View past reviews given
+- Report service quality issues
+- Recommend services to others
+
+**Loyalty & Rewards**
+- View loyalty points balance
+- Redeem loyalty points for discounts
+- Access customer loyalty programs
+- Receive special offers and promotions
+- View service usage statistics
+
+---
+
+### **👷 Employee Use Cases**
+
+**Authentication & Profile**
+- Login to employee mobile app
+- Update personal contact information
+- Change password and security settings
+- View employee ID and company information
+- Access company policies and procedures
+- Update emergency contact information
+
+**Schedule Management**
+- View daily work schedule
+- View weekly/monthly work calendar
+- Check assigned bookings and appointments
+- View customer details for each booking
+- See route optimization for multiple bookings
+- Access overtime schedule if applicable
+- View break times and lunch schedules
+
+**Booking & Assignment Management**
+- Receive work assignments from managers
+- View detailed booking information
+- Access customer contact details
+- Read special instructions from customers
+- View service requirements and materials needed
+- Check service location and GPS directions
+- Notify if unable to complete assigned work
+
+**Service Execution**
+- Check-in at customer location (GPS verification)
+- Start service timer
+- Follow company service protocols
+- Access service checklists and procedures
+- Take before/during/after photos
+- Document service completion details
+- Handle customer requests during service
+- Check-out when service is complete
+
+**Customer Interaction**
+- Communicate with customers through app
+- Answer customer questions about service
+- Request approval for overtime or additional work
+- Handle customer complaints professionally
+- Collect cash payments if needed
+- Explain services performed to customer
+- Get customer sign-off on completed work
+
+**Documentation & Reporting**
+- Upload photos of completed work
+- Fill out service completion reports
+- Document any issues encountered
+- Report equipment problems or maintenance needs
+- Record material usage
+- Submit expense reports
+- Log travel time and mileage
+
+**Training & Development**
+- Access company training materials
+- Complete required certification courses
+- View performance metrics and feedback
+- Access safety procedures and guidelines
+- Report workplace incidents
+- Suggest process improvements
+
+**Company Communication**
+- Receive company announcements
+- Access employee handbook
+- Contact supervisors or management
+- Report sick days or time off requests
+- View company news and updates
+- Access HR resources
+
+---
+
+### **👔 Manager/Admin Use Cases**
+
+**Employee Management**
+- Hire and onboard new employees
+- Manage employee profiles and information
+- Assign skills and certifications to employees
+- Create and manage work schedules
+- Monitor employee performance metrics
+- Conduct performance reviews
+- Handle employee disciplinary actions
+- Manage employee benefits and payroll
+- Track employee training and certifications
+
+**Service & Operations Management**
+- Create and configure new services
+- Set pricing for services and packages
+- Manage service availability and capacity
+- Configure service areas and coverage zones
+- Set business hours and holiday schedules
+- Manage equipment and supply inventory
+- Create service quality standards
+- Monitor operational efficiency metrics
+
+**Booking & Assignment Management**
+- Monitor all customer bookings in real-time
+- Manually assign employees to bookings
+- Handle booking conflicts and scheduling issues
+- Approve or reject overtime requests
+- Manage emergency scheduling and replacements
+- Optimize route planning for employees
+- Handle urgent or priority bookings
+- Manage booking cancellations and rescheduling
+
+**Customer Service Management**
+- Handle customer complaints and issues
+- Process refund requests
+- Manage customer escalations
+- Monitor customer satisfaction ratings
+- Respond to customer feedback
+- Manage customer loyalty programs
+- Handle billing disputes
+- Approve special pricing or discounts
+
+**Financial Management**
+- Monitor daily/monthly revenue
+- Track service profitability
+- Manage pricing strategies
+- Process employee payroll
+- Handle refunds and payment disputes
+- Generate financial reports
+- Monitor operational costs
+- Set budget targets and forecasts
+
+**Quality Control & Compliance**
+- Monitor service quality metrics
+- Conduct quality audits
+- Implement quality improvement processes
+- Ensure compliance with regulations
+- Manage customer feedback and reviews
+- Train employees on quality standards
+- Handle service failures and corrections
+- Maintain service quality certifications
+
+**Analytics & Reporting**
+- Generate business performance reports
+- Monitor key performance indicators (KPIs)
+- Analyze customer satisfaction trends
+- Track employee productivity metrics
+- Monitor financial performance
+- Generate operational efficiency reports
+- Analyze service demand patterns
+- Create executive dashboards
+
+**System Administration**
+- Manage user accounts and permissions
+- Configure system settings and parameters
+- Monitor system performance and uptime
+- Manage data backups and security
+- Handle system integrations
+- Manage mobile app configurations
+- Monitor API usage and performance
+- Handle system maintenance and updates
+
+---
+
+### **🤖 System Automated Use Cases**
+
+**Booking Automation**
+- Auto-assign employees to bookings based on skills/availability
+- Send booking confirmation notifications
+- Generate booking numbers and references
+- Calculate service pricing and taxes
+- Send reminder notifications before appointments
+- Auto-escalate unassigned bookings to managers
+- Process booking modifications and updates
+
+**Payment Processing**
+- Process customer payments automatically
+- Handle payment gateway integrations
+- Generate invoices and receipts
+- Process refunds and cancellations
+- Calculate loyalty points and rewards
+- Send payment confirmation notifications
+- Handle failed payment retries
+
+**Notification Management**
+- Send push notifications for booking updates
+- Email confirmations and reminders
+- SMS notifications for urgent updates
+- Send service completion notifications
+- Alert managers of system issues
+- Notify employees of new assignments
+- Send promotional messages and offers
+
+**Data Management & Analytics**
+- Collect and store service performance data
+- Generate automated reports
+- Monitor system performance metrics
+- Backup data automatically
+- Sync data across mobile and web platforms
+- Archive completed bookings
+- Generate business intelligence insights
+
+**Schedule Optimization**
+- Optimize employee routes and schedules
+- Suggest best assignment matches
+- Calculate travel times and distances
+- Balance workload across employees
+- Identify scheduling conflicts
+- Suggest schedule improvements
+- Handle daylight saving time adjustments
+
+**Quality Monitoring**
+- Track service completion times
+- Monitor customer satisfaction scores
+- Alert managers of quality issues
+- Generate quality performance reports
+- Track employee performance metrics
+- Monitor service standard compliance
+
+**Security & Maintenance**
+- Monitor system security threats
+- Perform automatic system updates
+- Handle user authentication and authorization
+- Log system activities for audit trails
+- Monitor API rate limiting
+- Perform database maintenance tasks
+- Handle system backup and recovery
 
 ---
 
@@ -585,18 +880,18 @@ Customer Booking Process:
 
 ---
 
-## 💰 Money Flow & Revenue Model
+## 💰 Money Flow & Business Revenue Model
 
-### **📊 Pricing Structure**
+### **📊 Company Service Pricing Structure**
 
-When a customer books a service, the pricing calculation follows this structure:
+As a **home service company** with employed staff, the pricing calculation follows this structure:
 
 ```typescript
 // Example: House Cleaning Premium Package
 Booking Calculation:
 ├── Base Package Price: $75.00
 ├── Overtime Charges: $25.00/hour (if exceeds estimated time)
-├── Platform Fees: Included in package price
+├── Service Fees: Included in package price
 ├── Taxes: Calculated based on location
 └── Total Amount: Base + Overtime + Taxes
 ```
@@ -605,47 +900,50 @@ Booking Calculation:
 - **TotalAmount**: Initial calculated price when booking is created
 - **FinalAmount**: Final price after service completion (includes overtime, adjustments)
 
-### **🔄 Complete Money Flow**
+### **🔄 Complete Money Flow (Company Business Model)**
 
 ```mermaid
 graph TD
-    A["👤 Customer<br/>Books Service Package<br/>$75"] --> B["💳 Payment Processing<br/>TotalAmount: $75"]
+    A["👤 Customer<br/>Books Service Package<br/>$75"] --> B["💳 Payment Processing<br/>Company Receives $75"]
     B --> C{"Payment Method"}
-    C -->|Cash| D["💵 Cash Payment<br/>Staff Collects On-Site"]
-    C -->|Electronic| E["🏦 Payment Gateway<br/>Stripe/PayPal/MoMo"]
+    C -->|Cash| D["💵 Cash Payment<br/>Staff Collects for Company"]
+    C -->|Electronic| E["🏦 Payment Gateway<br/>Direct to Company Account"]
     
-    D --> F["✅ Payment Confirmed<br/>Status: Paid"]
+    D --> F["✅ Payment Confirmed<br/>Company Revenue: $75"]
     E --> F
     
-    F --> G["💰 Revenue Distribution"]
-    G --> H["📊 Platform Commission<br/>15% = $11.25"]
-    G --> I["👷 Staff Payment<br/>85% = $63.75"]
+    F --> G["🏢 Company Revenue<br/>100% = $75.00"]
+    G --> H["📊 Business Operations"]
     
-    H --> J["🏢 Platform Operations<br/>• Technology Development<br/>• Customer Support<br/>• Marketing"]
+    H --> I["👷 Staff Salaries<br/>Fixed Monthly/Hourly Wages"]
+    H --> J["🛠️ Equipment & Supplies<br/>Company Provides All Materials"]
+    H --> K["🚗 Transportation<br/>Vehicle Costs & Fuel"]
+    H --> L["📱 System Operations<br/>Technology & Support"]
+    H --> M["📈 Business Profit<br/>After All Expenses"]
     
-    I --> K["💳 Staff Payout<br/>• Weekly/Monthly Transfer<br/>• Bank Account<br/>• E-Wallet"]
-    
-    L["❌ Refund Scenarios"] --> M["🔄 Refund Processing"]
-    M --> N["👤 Customer Refund"]
-    M --> O["👷 Staff Deduction"]
+    N["❌ Refund Scenarios"] --> O["🔄 Company Refund<br/>Full Company Loss"]
+    O --> P["👤 Customer Refund<br/>From Company Funds"]
 ```
 
-### **📈 Revenue Model Breakdown**
+### **📈 Company Revenue Model**
 
-**Commission Structure:**
-| Component | Percentage | Amount (on $75) | Description |
-|-----------|------------|-----------------|-------------|
-| **Service Revenue** | 100% | $75.00 | Total customer payment |
-| **Platform Commission** | 15% | $11.25 | Platform operational costs |
-| **Payment Processing** | 3% | $2.25 | Gateway fees (deducted from platform) |
-| **Staff Payout** | 82% | $61.50 | Final staff earning |
+**Revenue Structure (Traditional Service Business):**
+| Component | Amount (on $75) | Description |
+|-----------|-----------------|-------------|
+| **Gross Revenue** | $75.00 | Total customer payment to company |
+| **Staff Wages** | $20.00 | Fixed hourly wage (e.g., $20/hour for 1 staff) |
+| **Materials & Supplies** | $8.00 | Cleaning supplies, equipment depreciation |
+| **Transportation** | $7.00 | Vehicle costs, fuel, maintenance |
+| **System Operations** | $5.00 | App maintenance, admin costs |
+| **Insurance & Benefits** | $10.00 | Staff insurance, worker compensation |
+| **Net Profit** | $25.00 | Company profit margin (33%) |
 
-**Platform Revenue Streams:**
-1. **Service Commission**: 15-20% of each booking
-2. **Payment Processing**: Markup on gateway fees
-3. **Premium Subscriptions**: Enhanced features for staff
-4. **Advertising**: Promoted service listings
-5. **Surge Pricing**: Higher rates during peak demand
+**Company Revenue Streams:**
+1. **Service Revenue**: 100% of all customer payments
+2. **Package Premiums**: Higher margins on premium service packages
+3. **Add-on Services**: Additional services during appointments
+4. **Subscription Plans**: Regular customer service contracts
+5. **Corporate Contracts**: B2B cleaning contracts
 
 ### **💳 Payment Methods & Processing**
 
@@ -653,7 +951,7 @@ graph TD
 ```csharp
 public enum PaymentMethod
 {
-    Cash = 1,           // Staff collects at service location
+    Cash = 1,           // Staff collects cash for company
     CreditCard = 2,     // Visa, Mastercard via gateway
     DebitCard = 3,      // Direct bank debit
     BankTransfer = 4,   // Online banking transfer
@@ -664,9 +962,9 @@ public enum PaymentMethod
 
 **Payment Processing Flow:**
 1. **Pre-Authorization**: Hold amount when booking is confirmed
-2. **Capture**: Charge customer after service completion
-3. **Settlement**: Distribute funds to platform and staff
-4. **Reconciliation**: Daily financial reporting and balancing
+2. **Service Delivery**: Company staff provides service
+3. **Payment Capture**: Full amount goes to company account
+4. **Financial Recording**: Update company books and staff performance metrics
 
 ### **🔄 Refund & Cancellation Policies**
 
@@ -675,17 +973,17 @@ public enum PaymentMethod
 graph TD
     A["📋 Booking Created<br/>$75 Pre-authorized"] --> B{"Cancellation Time"}
     
-    B -->|"24+ hours before"| C["💯 Full Refund<br/>$75 to customer<br/>$0 to staff"]
-    B -->|"2-24 hours before"| D["🔗 50% Refund<br/>$37.50 to customer<br/>$37.50 to staff"]
-    B -->|"Less than 2 hours"| E["❌ No Refund<br/>$0 to customer<br/>$75 to staff"]
-    B -->|"Service started"| F["❌ No Refund<br/>Full amount to staff"]
+    B -->|"24+ hours before"| C["💯 Full Refund<br/>$75 to customer<br/>Company absorbs cost"]
+    B -->|"2-24 hours before"| D["🔗 50% Refund<br/>$37.50 to customer<br/>Company keeps $37.50"]
+    B -->|"Less than 2 hours"| E["❌ No Refund<br/>Company keeps full $75"]
+    B -->|"Service started"| F["❌ No Refund<br/>Company keeps full amount"]
     
     G["🚨 Service Quality Issues"] --> H["📞 Customer Complaint"]
-    H --> I["🔍 Admin Investigation"]
+    H --> I["🔍 Manager Investigation"]
     I --> J{"Resolution Decision"}
-    J -->|"Staff Fault"| K["💯 Full Refund + Staff Penalty"]
-    J -->|"Mutual Issue"| L["🔗 Partial Refund"]
-    J -->|"Customer Fault"| M["❌ No Refund"]
+    J -->|"Employee Error"| K["💯 Full Refund + Employee Training"]
+    J -->|"System Issue"| L["🔗 Partial Refund + Process Improvement"]
+    J -->|"Customer Error"| M["❌ No Refund"]
 ```
 
 **Refund Processing:**
@@ -701,38 +999,38 @@ Payment Refund Fields:
 
 **Scenario A: Standard Successful Service**
 ```
-1. Customer books "Premium House Cleaning" → $75 pre-authorized
-2. Staff arrives and completes service in 4 hours → No overtime
-3. Service completed successfully → $75 charged
-4. Revenue split: Platform $11.25 (15%) | Staff $63.75 (85%)
-5. Customer rates 5 stars → Service cycle complete
+1. Customer books "Premium House Cleaning" → $75 company revenue
+2. Employee arrives and completes service in 4 hours → Paid hourly wage
+3. Service completed successfully → $75 to company account
+4. Costs: Staff wage $20 + supplies $8 + overhead $22 = $50
+5. Company profit: $25 (33% margin) → Service cycle complete
 ```
 
 **Scenario B: Service with Overtime**
 ```
 1. Customer books "Basic House Cleaning" → $50 (3 hours estimated)
-2. Service requires 4 hours → 1 hour overtime at $25/hour
-3. Staff requests overtime approval → Customer approves
-4. Final amount: $75 ($50 base + $25 overtime)
-5. Revenue split: Platform $11.25 | Staff $63.75
+2. Service requires 4 hours → 1 hour overtime charge to customer
+3. Manager approves overtime billing → Customer pays additional $25
+4. Final revenue: $75 ($50 base + $25 overtime) to company
+5. Employee gets regular wage + overtime pay per company policy
 ```
 
 **Scenario C: Last-Minute Cancellation**
 ```
-1. Customer books service → $75 pre-authorized
+1. Customer books service → $75 pre-authorized to company
 2. Customer cancels 1 hour before service → 50% refund policy
-3. Refund processing: $37.50 back to customer
-4. Staff compensation: $37.50 (for reserved time slot)
-5. Platform keeps commission on non-refunded portion
+3. Company refunds: $37.50 back to customer
+4. Company keeps: $37.50 (covers staff scheduling costs)
+5. Employee may still get paid for scheduled time per company policy
 ```
 
 **Scenario D: Service Quality Issue**
 ```
-1. Service completed but customer unsatisfied → Complaint filed
-2. Admin reviews evidence (photos, staff report, customer feedback)
-3. Decision: Staff fault → Full refund + staff penalty
-4. Refund: $75 back to customer
-5. Staff penalty: Deduction from future earnings + training required
+1. Service completed but customer unsatisfied → Complaint to company
+2. Manager reviews evidence (photos, employee report, customer feedback)
+3. Decision: Employee error → Full refund + employee retraining
+4. Company refunds: $75 back to customer (company absorbs loss)
+5. Employee consequence: Additional training, performance review
 ```
 
 ### **📊 Financial Tracking & Reporting**
@@ -753,12 +1051,12 @@ Payment Entity:
 ```
 
 **Financial Analytics:**
-- **Daily Revenue**: Total earnings by service type and region
-- **Staff Performance**: Individual earnings, ratings, and job completion rates
-- **Commission Optimization**: Analysis of pricing and commission rates
-- **Payment Method Trends**: Customer preferences and conversion rates
+- **Daily Revenue**: Total company earnings by service type and region
+- **Employee Performance**: Individual productivity, ratings, and job completion rates
+- **Profit Margin Analysis**: Service profitability and pricing optimization
+- **Payment Method Trends**: Customer preferences and processing costs
 - **Refund Analysis**: Patterns and reasons for refunds
-- **Operational Costs**: Platform expenses vs. revenue
+- **Operational Costs**: Employee wages, supplies, overhead vs. revenue
 
 ### **🔐 Financial Security & Compliance**
 
@@ -783,19 +1081,19 @@ Payment Entity:
 ✅ Clear refund policies and protection  
 ✅ Secure payment processing  
 
-**For Staff:**
-✅ Guaranteed payment for completed services  
-✅ Transparent earning structure  
-✅ Regular payout schedule  
-✅ Protection against fraudulent customers  
+**For Employees:**
+✅ Stable salary/hourly wages regardless of booking volume  
+✅ Company-provided equipment and supplies  
+✅ Regular work schedule and benefits  
+✅ Training and career development opportunities  
 
-**For Platform:**
-✅ Sustainable revenue model  
-✅ Automated financial processing  
-✅ Scalable commission structure  
-✅ Comprehensive financial reporting  
+**For Company:**
+✅ Direct customer relationships and revenue control  
+✅ Scalable business model with employed workforce  
+✅ Quality control through employee management  
+✅ Comprehensive financial tracking and reporting  
 
-This financial model ensures **trust**, **transparency**, and **sustainability** for all stakeholders in the mobile home service ecosystem.
+This business model ensures **operational control**, **quality consistency**, and **sustainable growth** for the home service company.
 
 ---
 
