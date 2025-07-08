@@ -27,7 +27,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetServices([FromQuery] ServiceListRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.GetServicesAsync(request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetServiceById(int id, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.GetServiceByIdAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : NotFound(result);
+        return result.IsSucceeded ? Ok(result) : NotFound(result);
     }
 
     /// <summary>
@@ -49,7 +49,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> CreateService([FromBody] CreateServiceRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.CreateServiceAsync(request, cancellationToken);
-        return result.Success ? CreatedAtAction(nameof(GetServiceById), new { id = result.Data?.Id }, result) : BadRequest(result);
+        return result.IsSucceeded ? CreatedAtAction(nameof(GetServiceById), new { id = result.Data?.Id }, result) : BadRequest(result);
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> UpdateService(int id, [FromBody] UpdateServiceRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.UpdateServiceAsync(id, request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> DeleteService(int id, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.DeleteServiceAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -82,7 +82,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> ActivateService(int id, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.ActivateServiceAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -93,7 +93,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> DeactivateService(int id, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.DeactivateServiceAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -104,7 +104,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetServicesByType(ServiceType type, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.GetServicesByTypeAsync(type, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -115,7 +115,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetPopularServices([FromQuery] int limit = 10, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.GetPopularServicesAsync(limit, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> CalculateServicePrice(int id, [FromBody] CalculatePriceRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.CalculateServicePriceAsync(id, request.ServicePackageId, request.DurationMinutes, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     // Service Package endpoints
@@ -139,7 +139,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetServicePackagesByServiceId(int serviceId, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.GetServicePackagesByServiceIdAsync(serviceId, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -150,7 +150,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetServicePackageById(int id, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.GetServicePackageByIdAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : NotFound(result);
+        return result.IsSucceeded ? Ok(result) : NotFound(result);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> CreateServicePackage([FromBody] CreateServicePackageRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.CreateServicePackageAsync(request, cancellationToken);
-        return result.Success ? CreatedAtAction(nameof(GetServicePackageById), new { id = result.Data?.Id }, result) : BadRequest(result);
+        return result.IsSucceeded ? CreatedAtAction(nameof(GetServicePackageById), new { id = result.Data?.Id }, result) : BadRequest(result);
     }
 
     /// <summary>
@@ -172,7 +172,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> UpdateServicePackage(int id, [FromBody] CreateServicePackageRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.UpdateServicePackageAsync(id, request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -183,7 +183,7 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> DeleteServicePackage(int id, CancellationToken cancellationToken = default)
     {
         var result = await _serviceManagementService.DeleteServicePackageAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 }
 

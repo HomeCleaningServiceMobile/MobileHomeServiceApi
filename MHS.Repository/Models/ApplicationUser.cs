@@ -17,18 +17,31 @@ public class ApplicationUser : IdentityUser<int>
     [Required]
     public UserRole Role { get; set; }
     
-    public UserStatus Status { get; set; } = UserStatus.Active;
+    [Required]
+    public UserStatus Status { get; set; }
     
     [MaxLength(255)]
     public string? ProfileImageUrl { get; set; }
+
     
+    // Additional profile fields
+    public DateTime? DateOfBirth { get; set; }
+    
+    [MaxLength(20)]
+    public string? Gender { get; set; }
+    
+    [MaxLength(100)]
+    public string? EmergencyContactName { get; set; }
+    
+    [MaxLength(20)]
+    public string? EmergencyContactPhone { get; set; }
+    
+    // Timestamp fields
     public DateTime? LastLoginAt { get; set; }
-    
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
+    public DateTime? EmailVerifiedAt { get; set; }
+    public DateTime? PhoneVerifiedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    
-    public bool IsDeleted { get; set; } = false;
     
     // Navigation properties
     public virtual Customer? Customer { get; set; }

@@ -36,7 +36,7 @@ public class BookingsController : ControllerBase
         var customerId = userId; // This should be mapped to actual customer ID
 
         var result = await _bookingService.CreateBookingAsync(customerId, request, cancellationToken);
-        return result.Success ? CreatedAtAction(nameof(GetBookingById), new { id = result.Data?.Id }, result) : BadRequest(result);
+        return result.IsSucceeded ? CreatedAtAction(nameof(GetBookingById), new { id = result.Data?.Id }, result) : BadRequest(result);
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> GetBookingById(int id, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.GetBookingByIdAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : NotFound(result);
+        return result.IsSucceeded ? Ok(result) : NotFound(result);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> GetBookings([FromQuery] BookingListRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.GetBookingsAsync(request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> UpdateBooking(int id, [FromBody] UpdateBookingRequest request, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.UpdateBookingAsync(id, request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> CancelBooking(int id, [FromBody] string reason, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.CancelBookingAsync(id, reason, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -96,7 +96,7 @@ public class BookingsController : ControllerBase
         var staffId = userId; // This should be mapped to actual staff ID
 
         var result = await _bookingService.RespondToBookingAsync(staffId, request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -115,7 +115,7 @@ public class BookingsController : ControllerBase
         var staffId = userId; // This should be mapped to actual staff ID
 
         var result = await _bookingService.CheckInAsync(staffId, request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -134,7 +134,7 @@ public class BookingsController : ControllerBase
         var staffId = userId; // This should be mapped to actual staff ID
 
         var result = await _bookingService.CheckOutAsync(staffId, request, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -145,7 +145,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> GetAvailableTimeSlots([FromQuery] int serviceId, [FromQuery] DateTime date, [FromQuery] decimal latitude, [FromQuery] decimal longitude, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.GetAvailableTimeSlotsAsync(serviceId, date, latitude, longitude, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> FindAvailableStaff([FromQuery] int serviceId, [FromQuery] DateTime scheduledDate, [FromQuery] TimeSpan scheduledTime, [FromQuery] decimal latitude, [FromQuery] decimal longitude, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.FindAvailableStaffAsync(serviceId, scheduledDate, scheduledTime, latitude, longitude, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> AutoAssignStaff(int id, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.AutoAssignStaffAsync(id, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -178,7 +178,7 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> ManualAssignStaff(int id, int staffId, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.ManualAssignStaffAsync(id, staffId, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -197,7 +197,7 @@ public class BookingsController : ControllerBase
         var customerId = userId; // This should be mapped to actual customer ID
 
         var result = await _bookingService.ConfirmBookingCompletionAsync(id, customerId, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
     /// <summary>
@@ -208,6 +208,6 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> ForceCompleteBooking(int id, [FromBody] string reason, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.ForceCompleteBookingAsync(id, reason, cancellationToken);
-        return result.Success ? Ok(result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 } 

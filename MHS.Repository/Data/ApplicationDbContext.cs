@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using MHS.Common;
+using MHS.Common.Enums;
 using MHS.Repository.Models;
 
 namespace MHS.Repository.Data;
@@ -11,7 +12,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     {
     }
 
-    // DbSets (Users now handled by Identity)
     public DbSet<Customer> Customers { get; set; }
     public DbSet<Staff> Staffs { get; set; }
     public DbSet<Admin> Admins { get; set; }
@@ -36,10 +36,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         // ApplicationUser configurations
         modelBuilder.Entity<ApplicationUser>(entity =>
         {
-            entity.ToTable("Users"); // Keep existing table name
-            entity.HasQueryFilter(e => !e.IsDeleted);
+            entity.Property(p => p.Role)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (UserRole)System.Enum.Parse(typeof(UserRole), v)
+                )
+                .HasDefaultValue(UserRole.Customer);
+                
+            entity.Property(p => p.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (UserStatus)System.Enum.Parse(typeof(UserStatus), v)
+                )
+                .HasDefaultValue(UserStatus.Active);
         });
-
+        
         // Customer configurations
         modelBuilder.Entity<Customer>(entity =>
         {
@@ -76,6 +87,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         {
             entity.Property(e => e.BasePrice).HasPrecision(10, 2);
             entity.Property(e => e.HourlyRate).HasPrecision(10, 2);
+            
+            entity.Property(p => p.Type)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (ServiceType)System.Enum.Parse(typeof(ServiceType), v)
+                )
+                .HasDefaultValue(ServiceType.HouseCleaning);
         });
 
         // ServicePackage configurations
@@ -92,6 +110,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             entity.Property(e => e.FinalAmount).HasPrecision(10, 2);
             entity.Property(e => e.AddressLatitude).HasPrecision(10, 8);
             entity.Property(e => e.AddressLongitude).HasPrecision(11, 8);
+            
+            entity.Property(p => p.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (BookingStatus)System.Enum.Parse(typeof(BookingStatus), v)
+                )
+                .HasDefaultValue(BookingStatus.Pending);
             
             // Configure relationships to avoid cascade conflicts
             entity.HasOne(b => b.Customer)
@@ -116,6 +141,20 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             entity.HasIndex(e => e.PaymentNumber).IsUnique();
             entity.Property(e => e.Amount).HasPrecision(10, 2);
             entity.Property(e => e.RefundAmount).HasPrecision(10, 2);
+            
+            entity.Property(p => p.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (PaymentStatus)System.Enum.Parse(typeof(PaymentStatus), v)
+                )
+                .HasDefaultValue(PaymentStatus.Pending);
+                
+            entity.Property(p => p.Method)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (PaymentMethod)System.Enum.Parse(typeof(PaymentMethod), v)
+                )
+                .HasDefaultValue(PaymentMethod.Cash);
             
             entity.HasOne(p => p.Booking)
                 .WithOne(b => b.Payment)
@@ -191,6 +230,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         // WorkSchedule configurations
         modelBuilder.Entity<WorkSchedule>(entity =>
         {
+            entity.Property(p => p.Status)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (WorkScheduleStatus)System.Enum.Parse(typeof(WorkScheduleStatus), v)
+                )
+                .HasDefaultValue(WorkScheduleStatus.Available);
+            
             entity.HasOne(ws => ws.Staff)
                 .WithMany()
                 .HasForeignKey(ws => ws.StaffId)
@@ -205,6 +251,13 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         // Notification configurations
         modelBuilder.Entity<Notification>(entity =>
         {
+            entity.Property(p => p.Type)
+                .HasConversion(
+                    v => v.ToString(),
+                    v => (NotificationType)System.Enum.Parse(typeof(NotificationType), v)
+                )
+                .HasDefaultValue(NotificationType.SystemAlert);
+            
             entity.HasOne(n => n.User)
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId)
