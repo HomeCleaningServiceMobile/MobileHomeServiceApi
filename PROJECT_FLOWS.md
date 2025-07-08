@@ -465,86 +465,39 @@ graph TD
 - Update personal contact information
 - Change password and security settings
 - View employee ID and company information
-- Access company policies and procedures
-- Update emergency contact information
 
 **Schedule Management**
 - View daily work schedule
 - View weekly/monthly work calendar
 - Check assigned bookings and appointments
 - View customer details for each booking
-- See route optimization for multiple bookings
-- Access overtime schedule if applicable
-- View break times and lunch schedules
 
 **Booking & Assignment Management**
 - Receive work assignments from managers
 - View detailed booking information
 - Access customer contact details
 - Read special instructions from customers
-- View service requirements and materials needed
 - Check service location and GPS directions
 - Notify if unable to complete assigned work
 
 **Service Execution**
 - Check-in at customer location (GPS verification)
-- Start service timer
-- Follow company service protocols
-- Access service checklists and procedures
 - Take before/during/after photos
-- Document service completion details
 - Handle customer requests during service
 - Check-out when service is complete
 
 **Customer Interaction**
 - Communicate with customers through app
-- Answer customer questions about service
-- Request approval for overtime or additional work
-- Handle customer complaints professionally
 - Collect cash payments if needed
 - Explain services performed to customer
 - Get customer sign-off on completed work
-
-**Documentation & Reporting**
-- Upload photos of completed work
-- Fill out service completion reports
-- Document any issues encountered
-- Report equipment problems or maintenance needs
-- Record material usage
-- Submit expense reports
-- Log travel time and mileage
-
-**Training & Development**
-- Access company training materials
-- Complete required certification courses
-- View performance metrics and feedback
-- Access safety procedures and guidelines
-- Report workplace incidents
-- Suggest process improvements
-
-**Company Communication**
-- Receive company announcements
-- Access employee handbook
-- Contact supervisors or management
-- Report sick days or time off requests
-- View company news and updates
-- Access HR resources
 
 ---
 
 ### **👔 Manager/Admin Use Cases**
 
 **Employee Management**
-- Hire and onboard new employees
-- Manage employee profiles and information
-- Assign skills and certifications to employees
-- Create and manage work schedules
-- Monitor employee performance metrics
-- Conduct performance reviews
-- Handle employee disciplinary actions
-- Manage employee benefits and payroll
-- Track employee training and certifications
-
+- CRUD new Staff
 **Service & Operations Management**
 - Create and configure new services
 - Set pricing for services and packages
@@ -671,16 +624,6 @@ graph TD
 - Generate quality performance reports
 - Track employee performance metrics
 - Monitor service standard compliance
-
-**Security & Maintenance**
-- Monitor system security threats
-- Perform automatic system updates
-- Handle user authentication and authorization
-- Log system activities for audit trails
-- Monitor API rate limiting
-- Perform database maintenance tasks
-- Handle system backup and recovery
-
 ---
 
 ## 🛠️ API Endpoints Overview
@@ -1150,7 +1093,9 @@ CustomerPaymentMethods
 dotnet build
 
 # Run database migrations
-dotnet ef database update
+Pick Repository as target project
+Add-Migration {name}
+Update-Database
 
 # Start the application
 dotnet run --project MobileHomeServiceApi
@@ -1161,40 +1106,8 @@ Access Swagger UI at: `https://localhost:5001/swagger`
 
 ---
 
-## 📈 Business Model
-
-The system operates as a **service marketplace** where:
-- Customers pay for services through the platform
-- Staff receive payment for completed services
-- The platform takes a commission from each transaction
-- Quality is maintained through reviews and ratings
-
-### **Revenue Streams**
-1. **Commission**: Percentage of each transaction
-2. **Subscription**: Premium features for staff
-3. **Advertising**: Promoted services
-4. **Service Fees**: Booking and payment processing fees
-
 ---
 
-## 🔮 Future Enhancements
-
-### **Planned Features**
-- **Real-time Chat**: Communication between customers and staff
-- **Video Calls**: Remote consultation capabilities
-- **AI Scheduling**: Machine learning for optimal staff assignment
-- **IoT Integration**: Smart home device integration
-- **Multi-language Support**: Localization for different markets
-- **Advanced Analytics**: Business intelligence dashboard
-- **Mobile Push Notifications**: Real-time mobile alerts
-- **Loyalty Program**: Customer retention features
-
-### **Scalability Considerations**
-- **Microservices Architecture**: Break down into smaller services
-- **Event-Driven Architecture**: Implement event sourcing
-- **Caching Strategy**: Redis for distributed caching
-- **Load Balancing**: Multiple API instances
-- **Database Sharding**: Horizontal scaling
 
 ---
 
