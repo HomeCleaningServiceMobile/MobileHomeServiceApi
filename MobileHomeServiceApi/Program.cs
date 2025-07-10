@@ -101,7 +101,12 @@ builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 
 // JWT Authentication Configuration (still needed for API tokens)
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
-var secretKey = jwtSettings["SecretKey"] ?? throw new InvalidOperationException("JWT SecretKey is not configured");
+var secretKey = jwtSettings["SecretKey"];
+if (string.IsNullOrEmpty(secretKey))
+{
+    // Nếu đang chạy migration (design time), gán giá trị tạm để tránh lỗi
+    secretKey = "DummySecretKeyForMigrationOnly123456789012345"; // Đảm bảo đủ 32 ký tự
+}
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

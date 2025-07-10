@@ -21,7 +21,7 @@ public interface IServiceManagementService
     Task<ApiResponse<string>> DeleteServicePackageAsync(int id, CancellationToken cancellationToken = default);
     
     // Pricing operations
-    Task<ApiResponse<decimal>> CalculateServicePriceAsync(int serviceId, int? servicePackageId, int durationMinutes, CancellationToken cancellationToken = default);
+    Task<ApiResponse<ServicePriceResponse>> CalculateServicePriceAsync(int serviceId, int? servicePackageId, int durationMinutes, CancellationToken cancellationToken = default);
     Task<ApiResponse<List<ServiceResponse>>> GetServicesByTypeAsync(Common.Enums.ServiceType type, CancellationToken cancellationToken = default);
     Task<ApiResponse<List<ServiceResponse>>> GetPopularServicesAsync(int limit = 10, CancellationToken cancellationToken = default);
 } 
