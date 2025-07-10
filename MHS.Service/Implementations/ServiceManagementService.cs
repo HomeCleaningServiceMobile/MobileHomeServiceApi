@@ -16,6 +16,7 @@ using System.Linq.Expressions;
 
 namespace MHS.Service.Implementations
 {
+
     public class ServiceManagementService : IServiceManagementService
     {
         private readonly IUnitOfWork _unitOfWork;
