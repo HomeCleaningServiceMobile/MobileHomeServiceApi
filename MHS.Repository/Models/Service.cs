@@ -18,9 +18,11 @@ public class Service : BaseEntity
     public ServiceType Type { get; set; }
     
     [Column(TypeName = "decimal(10,2)")]
+    [Range(0, double.MaxValue, ErrorMessage = "Base price must be non-negative.")]
     public decimal BasePrice { get; set; }
     
     [Column(TypeName = "decimal(10,2)")]
+    [Range(0, double.MaxValue, ErrorMessage = "Hourly rate must be non-negative.")]
     public decimal? HourlyRate { get; set; }
     
     public int EstimatedDurationMinutes { get; set; }
@@ -35,7 +37,10 @@ public class Service : BaseEntity
     
     [MaxLength(1000)]
     public string? Restrictions { get; set; }
-    
+
+    [Column(TypeName = "decimal(10,2)")]
+    public decimal? AreaMeters { get; set; }
+
     // Navigation properties
     public virtual ICollection<ServicePackage> ServicePackages { get; set; } = new List<ServicePackage>();
     public virtual ICollection<StaffSkill> StaffSkills { get; set; } = new List<StaffSkill>();

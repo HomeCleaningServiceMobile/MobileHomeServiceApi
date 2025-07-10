@@ -17,6 +17,7 @@ public class ServicePackage : BaseEntity
     public string Description { get; set; } = string.Empty;
     
     [Column(TypeName = "decimal(10,2)")]
+    [Range(0, double.MaxValue, ErrorMessage = "Price must be non-negative.")]
     public decimal Price { get; set; }
     
     public int DurationMinutes { get; set; }

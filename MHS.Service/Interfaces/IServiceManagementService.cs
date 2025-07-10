@@ -22,7 +22,7 @@ public interface IServiceManagementService
     Task<AppResponse<string>> DeleteServicePackageAsync(int id, CancellationToken cancellationToken = default);
     
     // Pricing operations
-    Task<AppResponse<decimal>> CalculateServicePriceAsync(int serviceId, int? servicePackageId, int durationMinutes, CancellationToken cancellationToken = default);
+    Task<AppResponse<ServicePriceResponse>> CalculateServicePriceAsync(int serviceId, int? servicePackageId, int durationMinutes, CancellationToken cancellationToken = default);
     Task<AppResponse<List<ServiceResponse>>> GetServicesByTypeAsync(Common.Enums.ServiceType type, CancellationToken cancellationToken = default);
     Task<AppResponse<List<ServiceResponse>>> GetPopularServicesAsync(int limit = 10, CancellationToken cancellationToken = default);
 } 

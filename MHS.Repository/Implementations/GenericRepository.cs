@@ -100,25 +100,25 @@ where T : BaseEntity
         return await _context.SaveChangesAsync();
     }
 
-    public async Task<IReadOnlyList<T>> ListAsync(
-        Expression<Func<T, bool>>? filter = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null
-    )
-    {
-        IQueryable<T> query = _context.Set<T>();
+    //public async Task<IReadOnlyList<T>> ListAsync(
+    //    Expression<Func<T, bool>>? filter = null,
+    //    Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null
+    //)
+    //{
+    //    IQueryable<T> query = _context.Set<T>();
 
-        if (filter != null)
-        {
-            query = query.Where(filter);
-        }
+    //    if (filter != null)
+    //    {
+    //        query = query.Where(filter);
+    //    }
 
-        if (orderBy != null)
-        {
-            query = orderBy(query);
-        }
+    //    if (orderBy != null)
+    //    {
+    //        query = orderBy(query);
+    //    }
 
-        return await query.ToListAsync();
-    }
+    //    return await query.ToListAsync();
+    //}
 
     public async Task<IReadOnlyList<T>> ListAsync(
         Expression<Func<T, bool>>? filter = null,

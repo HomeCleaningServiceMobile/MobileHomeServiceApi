@@ -58,6 +58,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                 .WithOne(u => u.Customer)
                 .HasForeignKey<Customer>(c => c.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            // Add precision for decimal properties
+            entity.Property(e => e.AverageRating).HasPrecision(3, 2);
+            entity.Property(e => e.TotalSpent).HasPrecision(10, 2);
         });
 
         // Staff configurations
@@ -69,6 +73,12 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                 .OnDelete(DeleteBehavior.Cascade);
             
             entity.HasIndex(e => e.EmployeeId).IsUnique();
+            
+            // Add precision for decimal properties
+            entity.Property(e => e.AverageRating).HasPrecision(3, 2);
+            entity.Property(e => e.HourlyRate).HasPrecision(10, 2);
+            entity.Property(e => e.CurrentLatitude).HasPrecision(10, 8);
+            entity.Property(e => e.CurrentLongitude).HasPrecision(11, 8);
         });
 
         // Admin configurations
@@ -262,13 +272,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        // Staff location configurations
-        modelBuilder.Entity<Staff>(entity =>
-        {
-            entity.Property(e => e.CurrentLatitude).HasPrecision(10, 8);
-            entity.Property(e => e.CurrentLongitude).HasPrecision(11, 8);
         });
 
         // Configure soft delete filter (User filter already set above)
