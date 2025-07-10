@@ -19,7 +19,7 @@ The Mobile Home Service API is a comprehensive backend system designed for a **h
 
 ### **Main Objectives**
 - **Service Management**: System for customers to book various home services from the company
-- **Employee Management**: Tools for managing company staff schedules and assignments
+- **Staff Management**: Tools for managing company staff schedules and assignments
 - **Business Operations**: Administrative tools for managing company operations and finances
 - **Payment Processing**: Handle customer payments directly to the company
 - **Quality Assurance**: Review and rating system to maintain service quality standards
@@ -337,7 +337,7 @@ graph TD
 6. **Payment**: Process payment after service completion
 7. **Feedback**: Rate and review the service provider
 
-### **Employee Journey**
+### **Staff Journey**
 ```mermaid
 graph TD
     A[Hiring & Onboarding] --> B[Profile Setup]
@@ -352,7 +352,7 @@ graph TD
 
 **Detailed Steps:**
 1. **Hiring Process**: Company recruitment and background verification
-2. **Employee Onboarding**: Setup company profile and access credentials
+2. **Staff Onboarding**: Setup company profile and access credentials
 3. **Training & Certification**: Company-provided training on service standards
 4. **Schedule Management**: Assigned work hours and availability by managers
 5. **Work Assignment**: 
@@ -370,9 +370,9 @@ graph TD
 ```mermaid
 graph TD
     A[Company Operations] --> B[Service Management]
-    B --> C[Employee Management]
+    B --> C[Staff Management]
     C --> D[Booking Oversight]
-    D --> E[Employee Assignments]
+    D --> E[Staff Assignments]
     E --> F[Financial Management]
     F --> G[Analytics & Reports]
     G --> H[Quality Control]
@@ -380,11 +380,11 @@ graph TD
 
 **Detailed Steps:**
 1. **Service Management**: Create/update company service offerings and pricing
-2. **Employee Management**: Hire employees, manage schedules, monitor performance
+2. **Staff Management**: Hire Staffs, manage schedules, monitor performance
 3. **Booking Oversight**: Monitor all customer bookings and service delivery
-4. **Employee Assignment**: Assign employees to bookings based on skills and availability
-5. **Financial Management**: Track company revenue, costs, and employee compensation
-6. **Business Analytics**: Generate reports on revenue, employee performance, and customer satisfaction
+4. **Staff Assignment**: Assign Staffs to bookings based on skills and availability
+5. **Financial Management**: Track company revenue, costs, and Staff compensation
+6. **Business Analytics**: Generate reports on revenue, Staff performance, and customer satisfaction
 
 ---
 
@@ -421,7 +421,7 @@ graph TD
 - Cancel bookings (with refund policies)
 - Reschedule existing bookings
 - Add notes or update special instructions
-- Contact assigned employee through app
+- Contact assigned Staff through app
 
 **Payment & Billing**
 - Make payments for completed services
@@ -433,10 +433,10 @@ graph TD
 - View billing statements and receipts
 
 **Service Tracking & Communication**
-- Track employee arrival and service progress
+- Track Staff arrival and service progress
 - Receive real-time service status updates
-- View employee profile and ratings
-- Communicate with employee during service
+- View Staff profile and ratings
+- Communicate with Staff during service
 - Approve overtime charges if service runs long
 - Confirm service completion
 - Report issues or complaints
@@ -458,13 +458,13 @@ graph TD
 
 ---
 
-### **👷 Employee Use Cases**
+### **👷 Staff Use Cases**
 
 **Authentication & Profile**
-- Login to employee mobile app
+- Login to Staff mobile app
 - Update personal contact information
 - Change password and security settings
-- View employee ID and company information
+- View Staff ID and company information
 
 **Schedule Management**
 - View daily work schedule
@@ -496,7 +496,7 @@ graph TD
 
 ### **👔 Manager/Admin Use Cases**
 
-**Employee Management**
+**Staff Management**
 - CRUD new Staff
 **Service & Operations Management**
 - Create and configure new services
@@ -510,11 +510,11 @@ graph TD
 
 **Booking & Assignment Management**
 - Monitor all customer bookings in real-time
-- Manually assign employees to bookings
+- Manually assign Staffs to bookings
 - Handle booking conflicts and scheduling issues
 - Approve or reject overtime requests
 - Manage emergency scheduling and replacements
-- Optimize route planning for employees
+- Optimize route planning for Staffs
 - Handle urgent or priority bookings
 - Manage booking cancellations and rescheduling
 
@@ -532,7 +532,7 @@ graph TD
 - Monitor daily/monthly revenue
 - Track service profitability
 - Manage pricing strategies
-- Process employee payroll
+- Process Staff payroll
 - Handle refunds and payment disputes
 - Generate financial reports
 - Monitor operational costs
@@ -544,7 +544,7 @@ graph TD
 - Implement quality improvement processes
 - Ensure compliance with regulations
 - Manage customer feedback and reviews
-- Train employees on quality standards
+- Train Staffs on quality standards
 - Handle service failures and corrections
 - Maintain service quality certifications
 
@@ -552,7 +552,7 @@ graph TD
 - Generate business performance reports
 - Monitor key performance indicators (KPIs)
 - Analyze customer satisfaction trends
-- Track employee productivity metrics
+- Track Staff productivity metrics
 - Monitor financial performance
 - Generate operational efficiency reports
 - Analyze service demand patterns
@@ -573,7 +573,7 @@ graph TD
 ### **🤖 System Automated Use Cases**
 
 **Booking Automation**
-- Auto-assign employees to bookings based on skills/availability
+- Auto-assign Staffs to bookings based on skills/availability
 - Send booking confirmation notifications
 - Generate booking numbers and references
 - Calculate service pricing and taxes
@@ -596,7 +596,7 @@ graph TD
 - SMS notifications for urgent updates
 - Send service completion notifications
 - Alert managers of system issues
-- Notify employees of new assignments
+- Notify Staffs of new assignments
 - Send promotional messages and offers
 
 **Data Management & Analytics**
@@ -609,10 +609,10 @@ graph TD
 - Generate business intelligence insights
 
 **Schedule Optimization**
-- Optimize employee routes and schedules
+- Optimize Staff routes and schedules
 - Suggest best assignment matches
 - Calculate travel times and distances
-- Balance workload across employees
+- Balance workload across Staffs
 - Identify scheduling conflicts
 - Suggest schedule improvements
 - Handle daylight saving time adjustments
@@ -622,7 +622,7 @@ graph TD
 - Monitor customer satisfaction scores
 - Alert managers of quality issues
 - Generate quality performance reports
-- Track employee performance metrics
+- Track Staff performance metrics
 - Monitor service standard compliance
 ---
 
@@ -924,7 +924,7 @@ graph TD
     G["🚨 Service Quality Issues"] --> H["📞 Customer Complaint"]
     H --> I["🔍 Manager Investigation"]
     I --> J{"Resolution Decision"}
-    J -->|"Employee Error"| K["💯 Full Refund + Employee Training"]
+    J -->|"Staff Error"| K["💯 Full Refund + Staff Training"]
     J -->|"System Issue"| L["🔗 Partial Refund + Process Improvement"]
     J -->|"Customer Error"| M["❌ No Refund"]
 ```
@@ -943,7 +943,7 @@ Payment Refund Fields:
 **Scenario A: Standard Successful Service**
 ```
 1. Customer books "Premium House Cleaning" → $75 company revenue
-2. Employee arrives and completes service in 4 hours → Paid hourly wage
+2. Staff arrives and completes service in 4 hours → Paid hourly wage
 3. Service completed successfully → $75 to company account
 4. Costs: Staff wage $20 + supplies $8 + overhead $22 = $50
 5. Company profit: $25 (33% margin) → Service cycle complete
@@ -955,7 +955,7 @@ Payment Refund Fields:
 2. Service requires 4 hours → 1 hour overtime charge to customer
 3. Manager approves overtime billing → Customer pays additional $25
 4. Final revenue: $75 ($50 base + $25 overtime) to company
-5. Employee gets regular wage + overtime pay per company policy
+5. Staff gets regular wage + overtime pay per company policy
 ```
 
 **Scenario C: Last-Minute Cancellation**
@@ -964,16 +964,16 @@ Payment Refund Fields:
 2. Customer cancels 1 hour before service → 50% refund policy
 3. Company refunds: $37.50 back to customer
 4. Company keeps: $37.50 (covers staff scheduling costs)
-5. Employee may still get paid for scheduled time per company policy
+5. Staff may still get paid for scheduled time per company policy
 ```
 
 **Scenario D: Service Quality Issue**
 ```
 1. Service completed but customer unsatisfied → Complaint to company
-2. Manager reviews evidence (photos, employee report, customer feedback)
-3. Decision: Employee error → Full refund + employee retraining
+2. Manager reviews evidence (photos, Staff report, customer feedback)
+3. Decision: Staff error → Full refund + Staff retraining
 4. Company refunds: $75 back to customer (company absorbs loss)
-5. Employee consequence: Additional training, performance review
+5. Staff consequence: Additional training, performance review
 ```
 
 ### **📊 Financial Tracking & Reporting**
@@ -995,11 +995,11 @@ Payment Entity:
 
 **Financial Analytics:**
 - **Daily Revenue**: Total company earnings by service type and region
-- **Employee Performance**: Individual productivity, ratings, and job completion rates
+- **Staff Performance**: Individual productivity, ratings, and job completion rates
 - **Profit Margin Analysis**: Service profitability and pricing optimization
 - **Payment Method Trends**: Customer preferences and processing costs
 - **Refund Analysis**: Patterns and reasons for refunds
-- **Operational Costs**: Employee wages, supplies, overhead vs. revenue
+- **Operational Costs**: Staff wages, supplies, overhead vs. revenue
 
 ### **🔐 Financial Security & Compliance**
 
@@ -1024,7 +1024,7 @@ Payment Entity:
 ✅ Clear refund policies and protection  
 ✅ Secure payment processing  
 
-**For Employees:**
+**For Staffs:**
 ✅ Stable salary/hourly wages regardless of booking volume  
 ✅ Company-provided equipment and supplies  
 ✅ Regular work schedule and benefits  
@@ -1033,7 +1033,7 @@ Payment Entity:
 **For Company:**
 ✅ Direct customer relationships and revenue control  
 ✅ Scalable business model with employed workforce  
-✅ Quality control through employee management  
+✅ Quality control through Staff management  
 ✅ Comprehensive financial tracking and reporting  
 
 This business model ensures **operational control**, **quality consistency**, and **sustainable growth** for the home service company.

@@ -44,7 +44,24 @@ public class Staff : BaseEntity
     
     [Column(TypeName = "decimal(11,8)")]
     public decimal? CurrentLongitude { get; set; }
-    
+    [Required]
+    [MaxLength(500)]
+    public string FullAddress { get; set; } = string.Empty;
+
+    [MaxLength(100)]
+    public string? Street { get; set; }
+
+    [MaxLength(100)]
+    public string? District { get; set; }
+
+    [MaxLength(100)]
+    public string? City { get; set; }
+
+    [MaxLength(100)]
+    public string? Province { get; set; }
+
+    [MaxLength(20)]
+    public string? PostalCode { get; set; }
     // Navigation properties
     [ForeignKey(nameof(UserId))]
     public virtual ApplicationUser User { get; set; } = null!;
