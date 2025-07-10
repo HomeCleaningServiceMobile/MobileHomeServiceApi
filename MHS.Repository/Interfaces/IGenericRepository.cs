@@ -22,10 +22,10 @@ public interface IGenericRepository<T> where T : BaseEntity
     Task<T?> GetEntityByIdAsync(int id);
     Task<IReadOnlyList<T>> ListAllAsync();
     Task<int> SaveChangesAsync();
-    Task<IReadOnlyList<T>> ListAsync(
-        Expression<Func<T, bool>>? filter = null,
-        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null
-    );
+    //Task<IReadOnlyList<T>> ListAsync(
+    //    Expression<Func<T, bool>>? filter = null,
+    //    Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null
+    //);
     Task<IReadOnlyList<T>> ListAsync(
         Expression<Func<T, bool>>? filter = null,
         Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,

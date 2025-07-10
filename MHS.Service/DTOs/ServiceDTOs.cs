@@ -143,4 +143,18 @@ public class ServiceSummaryResponse
     public decimal BasePrice { get; set; }
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; }
-} 
+}
+
+public class ServicePriceResponse
+{
+    public int ServiceId { get; set; }
+    public string ServiceName { get; set; } = string.Empty;
+    public int? ServicePackageId { get; set; }
+    public string? ServicePackageName { get; set; }
+    public decimal BasePrice { get; set; }
+    public decimal? HourlyRate { get; set; }
+    public int DurationMinutes { get; set; }
+    public decimal CalculatedPrice { get; set; }
+    public string PricingMethod { get; set; } = string.Empty; // "Fixed", "Hourly", "Package"
+    public string? Breakdown { get; set; } // Calculated price breakdown details
+}
