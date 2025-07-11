@@ -233,61 +233,67 @@ public class AdminStaffService : IAdminStaffService
                     .SetErrorResponse("EmployeeId", "Employee ID already exists");
             }
 
-            // Create user
-            var user = new ApplicationUser
+            // Start transaction
+            return await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                FirstName = request.FirstName,
-                LastName = request.LastName,
-                Email = request.Email,
-                UserName = request.Email,
-                PhoneNumber = request.PhoneNumber,
-                Role = UserRole.Staff,
-                Status = UserStatus.Active,
-                CreatedAt = DateTime.UtcNow
-            };
+                // Create user
+                var user = new ApplicationUser
+                {
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Email = request.Email,
+                    UserName = request.Email,
+                    PhoneNumber = request.PhoneNumber,
+                    Role = UserRole.Staff,
+                    Status = UserStatus.Active,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            var createUserResult = await _userManager.CreateAsync(user, request.Password);
-            if (!createUserResult.Succeeded)
-            {
-                return new AppResponse<AdminStaffDetailResponse>()
-                    .SetErrorResponse("User", string.Join(", ", createUserResult.Errors.Select(e => e.Description)));
-            }
+                var createUserResult = await _userManager.CreateAsync(user, request.Password);
+                if (!createUserResult.Succeeded)
+                {
+                    throw new InvalidOperationException($"Failed to create user: {string.Join(", ", createUserResult.Errors.Select(e => e.Description))}");
+                }
 
-            // Add to Staff role
-            await _userManager.AddToRoleAsync(user, UserRole.Staff.ToString());
+                // Create staff profile
+                var staff = new Staff
+                {
+                    UserId = user.Id,
+                    EmployeeId = request.EmployeeId,
+                    HireDate = request.HireDate,
+                    Skills = request.Skills,
+                    Bio = request.Bio,
+                    HourlyRate = request.HourlyRate,
+                    ServiceRadiusKm = request.ServiceRadiusKm,
+                    FullAddress = request.FullAddress,
+                    Street = request.Street,
+                    District = request.District,
+                    City = request.City,
+                    Province = request.Province,
+                    PostalCode = request.PostalCode,
+                    CertificationImageUrl = request.CertificationImageUrl,
+                    IdCardImageUrl = request.IdCardImageUrl,
+                    IsAvailable = true,
+                    CreatedAt = DateTime.UtcNow
+                };
 
-            // Create staff profile
-            var staff = new Staff
-            {
-                UserId = user.Id,
-                EmployeeId = request.EmployeeId,
-                HireDate = request.HireDate,
-                Skills = request.Skills,
-                Bio = request.Bio,
-                HourlyRate = request.HourlyRate,
-                ServiceRadiusKm = request.ServiceRadiusKm,
-                FullAddress = request.FullAddress,
-                Street = request.Street,
-                District = request.District,
-                City = request.City,
-                Province = request.Province,
-                PostalCode = request.PostalCode,
-                CertificationImageUrl = request.CertificationImageUrl,
-                IdCardImageUrl = request.IdCardImageUrl,
-                IsAvailable = true,
-                CreatedAt = DateTime.UtcNow
-            };
+                await _unitOfWork.Repository<Staff>().AddAsync(staff);
+                await _unitOfWork.CompleteAsync();
 
-            await _unitOfWork.Repository<Staff>().AddAsync(staff);
-            await _unitOfWork.CompleteAsync();
+                // Return the created staff details
+                var staffDetailResult = await GetStaffByIdAsync(staff.Id);
+                if (!staffDetailResult.IsSucceeded)
+                {
+                    throw new InvalidOperationException("Failed to retrieve created staff details");
+                }
 
-            return await GetStaffByIdAsync(staff.Id);
+                return staffDetailResult;
+            });
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, "Error creating staff");
-            return new AppResponse<AdminStaffDetailResponse>()
-                .SetErrorResponse("Error", "Failed to create staff");
+            _logger.LogError(ex, "Business logic error creating staff: {Message}", ex.Message);
+            return new AppResponse<AdminStaffDetailResponse>().SetErrorResponse("User", ex.Message);
         }
     }
 
@@ -404,8 +410,7 @@ public class AdminStaffService : IAdminStaffService
     {
         try
         {
-            var staffList = await _unitOfWork.Repository<Staff>()
-                .ListAsync(s => s.Id == staffId && !s.IsDeleted, null,
+            var staffList = await _unitOfWork.Repository<Staff>().ListAsync(s => s.Id == staffId && !s.IsDeleted, null,
                     q => q.Include(s => s.User));
 
             var staff = staffList.FirstOrDefault();

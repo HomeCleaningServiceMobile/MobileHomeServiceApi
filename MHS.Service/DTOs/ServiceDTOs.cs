@@ -158,3 +158,44 @@ public class ServicePriceResponse
     public string PricingMethod { get; set; } = string.Empty; // "Fixed", "Hourly", "Package"
     public string? Breakdown { get; set; } // Calculated price breakdown details
 }
+
+// Admin-specific DTOs for enhanced service management
+public class ServiceStatisticsResponse
+{
+    public int ServiceId { get; set; }
+    public string ServiceName { get; set; } = string.Empty;
+    public ServiceType Type { get; set; }
+    public int TotalBookings { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public double AverageRating { get; set; }
+    public int ActivePackages { get; set; }
+    public DateTime LastBookingDate { get; set; }
+    public bool IsActive { get; set; }
+}
+
+public class ServiceAnalyticsRequest
+{
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public ServiceType? Type { get; set; }
+    public bool? IsActive { get; set; }
+}
+
+public class BulkServiceStatusRequest
+{
+    [Required]
+    public List<int> ServiceIds { get; set; } = new();
+    
+    [Required]
+    public bool IsActive { get; set; }
+}
+
+public class ServiceSearchRequest : ServiceListRequest
+{
+    public DateTime? CreatedAfter { get; set; }
+    public DateTime? CreatedBefore { get; set; }
+    public decimal? MinRevenue { get; set; }
+    public int? MinBookings { get; set; }
+    public string? SortBy { get; set; } // "name", "created", "bookings", "revenue"
+    public string? SortDirection { get; set; } = "asc"; // "asc" or "desc"
+}
