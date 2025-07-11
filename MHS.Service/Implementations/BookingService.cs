@@ -93,6 +93,12 @@ public class BookingService : IBookingService
             // Reload booking with related entities
             var createdBooking = await GetBookingWithRelatedEntitiesAsync(booking.Id);
             var response = _mapper.Map<BookingResponse>(createdBooking);
+            
+            if (createdBooking.Status == BookingStatus.Completed)
+            {
+                response.AddressLatitude = 0;
+                response.AddressLongitude = 0;
+            }
 
             _logger.LogInformation("Booking created successfully with ID {BookingId}", booking.Id);
 
@@ -119,6 +125,13 @@ public class BookingService : IBookingService
             }
 
             var response = _mapper.Map<BookingResponse>(booking);
+            // Ẩn vị trí nếu booking đã hoàn thành
+            if (booking.Status == BookingStatus.Completed)
+            {
+                response.AddressLatitude = 0;
+                response.AddressLongitude = 0;
+            }
+
             return new AppResponse<BookingResponse>()
                 .SetSuccessResponse(response);
         }
@@ -169,6 +182,15 @@ public class BookingService : IBookingService
             );
 
             var items = _mapper.Map<List<BookingSummaryResponse>>(bookings.Items);
+            // Ẩn vị trí nếu booking đã hoàn thành
+            foreach (var item in items)
+            {
+                if (item.Status == BookingStatus.Completed)
+                {
+                    item.AddressLatitude = 0;
+                    item.AddressLongitude = 0;
+                }
+            }
 
             return new AppResponse<List<BookingSummaryResponse>>()
                 .SetSuccessResponse(items)
@@ -226,6 +248,12 @@ public class BookingService : IBookingService
 
             var updatedBooking = await GetBookingWithRelatedEntitiesAsync(id);
             var response = _mapper.Map<BookingResponse>(updatedBooking);
+            // Ẩn vị trí nếu booking đã hoàn thành
+            if (updatedBooking.Status == BookingStatus.Completed)
+            {
+                response.AddressLatitude = 0;
+                response.AddressLongitude = 0;
+            }
 
             return new AppResponse<BookingResponse>()
                 .SetSuccessResponse(response, "Success", "Booking updated successfully");
@@ -585,7 +613,9 @@ public class BookingService : IBookingService
 
     public async Task<AppResponse<List<BookingSummaryResponse>>> GetAllBookingsAsync(BookingListRequest request, CancellationToken cancellationToken = default)
     {
-        return await GetBookingsAsync(request, cancellationToken);
+        var result = await GetBookingsAsync(request, cancellationToken);
+        // Đã xử lý ẩn vị trí trong GetBookingsAsync nên không cần lặp lại ở đây
+        return result;
     }
 
     public async Task<AppResponse<string>> ForceCompleteBookingAsync(int id, string reason, CancellationToken cancellationToken = default)
@@ -705,7 +735,9 @@ public class BookingService : IBookingService
     {
         // Set the staff ID filter
         request.StaffId = staffId;
-        return await GetBookingsAsync(request, cancellationToken);
+        var result = await GetBookingsAsync(request, cancellationToken);
+        // Đã xử lý ẩn vị trí trong GetBookingsAsync nên không cần lặp lại ở đây
+        return result;
     }
 
     // Helper methods

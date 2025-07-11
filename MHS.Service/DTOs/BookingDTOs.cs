@@ -108,7 +108,9 @@ public class BookingResponse
     public DateTime? CancelledAt { get; set; }
     public string? CancellationReason { get; set; }
     public DateTime CreatedAt { get; set; }
-    
+    public decimal AddressLatitude { get; set; }
+    public decimal AddressLongitude { get; set; }
+
     // Related entities
     public CustomerResponse Customer { get; set; } = null!;
     public ServiceResponse Service { get; set; } = null!;
