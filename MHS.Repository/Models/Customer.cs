@@ -19,7 +19,7 @@ public class Customer : BaseEntity
     public int TotalBookings { get; set; } = 0;
     
     public decimal AverageRating { get; set; } = 0;
-    
+    public decimal Balance { get; set; } = 0;
     // Navigation properties
     [ForeignKey(nameof(UserId))]
     public virtual ApplicationUser User { get; set; } = null!;
