@@ -128,6 +128,7 @@ builder.Services.AddScoped<IUserTokenService, UserTokenService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IServiceManagementService, ServiceManagementService>();
+builder.Services.AddScoped<IStaffService, StaffService>();
 
 // Additional services
 builder.Services.AddMemoryCache();
