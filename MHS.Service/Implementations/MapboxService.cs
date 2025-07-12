@@ -23,19 +23,30 @@ namespace MHS.Service.Implementations
 
         public async Task<(double lat, double lng)?> GeocodeAsync(string address, CancellationToken cancellationToken = default)
         {
-            var url = $"https://api.mapbox.com/geocoding/v5/mapbox.places/{Uri.EscapeDataString(address)}.json?access_token={_accessToken}";
-            var response = await _httpClient.GetAsync(url, cancellationToken);
-            if (!response.IsSuccessStatusCode) return null;
+            try
+            {
+                var url = $"https://api.mapbox.com/geocoding/v5/mapbox.places/{Uri.EscapeDataString(address)}.json?access_token={_accessToken}";
+                var response = await _httpClient.GetAsync(url, cancellationToken);
+                if (!response.IsSuccessStatusCode) return null;
 
-            var json = await response.Content.ReadAsStringAsync();
-            using var doc = JsonDocument.Parse(json);
-            var features = doc.RootElement.GetProperty("features");
-            if (features.GetArrayLength() == 0) return null;
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                if (!doc.RootElement.TryGetProperty("features", out var features) || features.GetArrayLength() == 0)
+                    return null;
 
-            var coords = features[0].GetProperty("center");
-            double lng = coords[0].GetDouble();
-            double lat = coords[1].GetDouble();
-            return (lat, lng);
+                var firstFeature = features[0];
+                if (!firstFeature.TryGetProperty("center", out var coords) || coords.GetArrayLength() < 2)
+                    return null;
+
+                double lng = coords[0].GetDouble();
+                double lat = coords[1].GetDouble();
+                return (lat, lng);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[MapboxService] GeocodeAsync error: {ex.Message}");
+                return null;
+            }
         }
 
         public async Task<string?> ReverseGeocodeAsync(double lat, double lng)
