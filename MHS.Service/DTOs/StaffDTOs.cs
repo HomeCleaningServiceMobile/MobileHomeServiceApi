@@ -39,4 +39,5 @@ public class StaffSkillResponse
     public string? Notes { get; set; }
     
     public ServiceResponse Service { get; set; } = null!;
-} 
+}
+
