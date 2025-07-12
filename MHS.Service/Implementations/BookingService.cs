@@ -32,7 +32,7 @@ public class BookingService : IBookingService
             _logger.LogInformation("Creating booking for customer {CustomerId}", customerId);
 
             // Validate customer exists
-            var customer = await _unitOfWork.Repository<Customer>().GetEntityByIdAsync(customerId);
+            var customer = await _unitOfWork.Repository<Customer>().GetFirstOrDefaultAsync(c => c.UserId == customerId);
             if (customer == null)
             {
                 return new AppResponse<BookingResponse>()
@@ -68,7 +68,7 @@ public class BookingService : IBookingService
             // Create booking entity
             var booking = new Booking
             {
-                CustomerId = customerId,
+                CustomerId = customer.Id,
                 ServiceId = request.ServiceId,
                 ServicePackageId = request.ServicePackageId,
                 BookingNumber = bookingNumber,
