@@ -1,6 +1,7 @@
 ﻿using MHS.Common.DTOs;
 using MHS.Service.DTOs;
 using MHS.Service.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,7 +9,7 @@ namespace MobileHomeServiceApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Staff,Admin")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Staff,Admin")]
     public class StaffController : ControllerBase
     {
         private readonly IStaffService _staffService;
