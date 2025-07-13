@@ -184,4 +184,9 @@ where T : BaseEntity
             pagination?.PageSize ?? totalCount,
             totalCount);
     }
+
+    public async Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _context.Set<T>().FirstOrDefaultAsync(predicate);
+    }
 } 

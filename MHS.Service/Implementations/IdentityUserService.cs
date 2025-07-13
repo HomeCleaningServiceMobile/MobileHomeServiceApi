@@ -529,7 +529,7 @@ public class IdentityUserService : IUserService
             };
 
             await _unitOfWork.Repository<Customer>().AddAsync(customer);
-
+            await _unitOfWork.CompleteAsync();
             // Add customer address if provided
             if (!string.IsNullOrEmpty(request.Address))
             {
@@ -548,9 +548,10 @@ public class IdentityUserService : IUserService
                 };
 
                 await _unitOfWork.Repository<CustomerAddress>().AddAsync(address);
+                await _unitOfWork.CompleteAsync();
             }
 
-            await _unitOfWork.CompleteAsync();
+            
 
             // Login the user after registration
             var loginRequest = new LoginRequest

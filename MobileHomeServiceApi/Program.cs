@@ -128,6 +128,8 @@ builder.Services.AddScoped<IUserTokenService, UserTokenService>();
 builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IServiceManagementService, ServiceManagementService>();
+builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<IMapboxService, MapboxService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 

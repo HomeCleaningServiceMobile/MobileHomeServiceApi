@@ -13,6 +13,7 @@ public interface IGenericRepository<T> where T : BaseEntity
     void UpdateRange(IEnumerable<T> entities);
     void DeleteRange(IEnumerable<T> entities);
     Task<bool> DeleteRangeAsync(Expression<Func<T, bool>> predicate);
+    Task<T?> GetFirstOrDefaultAsync(Expression<Func<T, bool>> predicate);
     Task<int> CountAsync();
     T? Delete(T entityToDelete);
     T? Delete(object id);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using MHS.Service.Interfaces;
 using MHS.Service.DTOs;
 using System.Security.Claims;
+using MHS.Service.Implementations;
 
 namespace MobileHomeServiceApi.Controllers;
 
@@ -12,10 +13,12 @@ namespace MobileHomeServiceApi.Controllers;
 public class BookingController : ControllerBase
 {
     private readonly IBookingService _bookingService;
+    private readonly IMapboxService _mapboxService;
     private readonly ILogger<BookingController> _logger;
 
-    public BookingController(IBookingService bookingService, ILogger<BookingController> logger)
+    public BookingController(IMapboxService mapboxService, IBookingService bookingService, ILogger<BookingController> logger)
     {
+        _mapboxService = mapboxService;
         _bookingService = bookingService;
         _logger = logger;
     }
@@ -510,6 +513,51 @@ public class BookingController : ControllerBase
             return StatusCode(500, "Internal server error");
         }
     }
+
+    [HttpGet("{id}/directions")]
+    [Authorize(Roles = "Staff")]
+    public async Task<IActionResult> GetDirections(int id)
+    {
+        try
+        {
+            var staffId = GetCurrentUserId();
+
+            
+            var bookingResult = await _bookingService.GetBookingByIdAsync(id);
+            if (!bookingResult.IsSucceeded || bookingResult.Data == null)
+                return NotFound("Booking not found");
+
+           
+            if (bookingResult.Data.Staff == null || bookingResult.Data.Staff.Id != staffId)
+                return Forbid("You are not assigned to this booking");
+
+            // L?y v? trí staff (gi? s? có trong bookingResult.Data.Staff)
+            var staffLat = bookingResult.Data.Staff.CurrentLatitude;
+            var staffLng = bookingResult.Data.Staff.CurrentLongitude;
+            var customerLat = bookingResult.Data.AddressLatitude;
+            var customerLng = bookingResult.Data.AddressLongitude;
+
+            if (staffLat == null || staffLng == null)
+                return BadRequest("Staff location not available");
+
+            // G?i MapboxService
+            var directions = await _mapboxService.GetDirectionsAsync(
+                (double)staffLat, (double)staffLng,
+                (double)customerLat, (double)customerLng
+            );
+
+            if (directions == null)
+                return StatusCode(502, "Failed to get directions from Mapbox");
+
+            return Ok(directions);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting directions for booking {BookingId}", id);
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
 
     #region Helper Methods
 
