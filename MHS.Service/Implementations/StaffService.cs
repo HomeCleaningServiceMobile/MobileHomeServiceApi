@@ -54,7 +54,9 @@ namespace MHS.Service.Implementations
         public async Task<AppResponse<List<GetStaffProfileResponse>>> GetAllStaffProfilesAsync(PaginationRequest request)
         {
             var response = new AppResponse<List<GetStaffProfileResponse>>();
-            var result = await _staffRepository.ListAsyncWithPaginated(pagination: request);
+            var result = await _staffRepository.ListAsyncWithPaginated(
+                includeProperties: query => query.Include(x => x.User),
+                pagination: request);
             if (result.TotalCount == 0)
             {
                 _ = response.SetErrorResponse("Staffs", "Not found any staffs");

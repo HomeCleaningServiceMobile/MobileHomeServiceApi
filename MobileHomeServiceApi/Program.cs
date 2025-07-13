@@ -129,6 +129,7 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IServiceManagementService, ServiceManagementService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
+builder.Services.AddScoped<ICustomerService, CustomerService>();
 
 // Additional services
 builder.Services.AddMemoryCache();
