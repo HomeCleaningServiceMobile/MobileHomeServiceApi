@@ -184,6 +184,8 @@ namespace MHS.Service.Implementations
                 }
 
                 customer.UpdatedAt = DateTime.UtcNow;
+
+                _customerRepository.Update(customer);
                 _ = await _unitOfWork.CompleteAsync();
 
                 return new AppResponse<string>().SetSuccessResponse(userId.ToString());
