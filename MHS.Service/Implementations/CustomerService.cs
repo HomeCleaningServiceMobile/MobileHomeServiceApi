@@ -149,6 +149,7 @@ namespace MHS.Service.Implementations
                     {
                         if (deletedAddresses.ContainsKey(address.Id))
                         {
+                            deletedAddresses.Remove(address.Id);
                             _ = deletedAddresses.TryGetValue(address.Id, out var addressInDb);
                             UpdateAddress(addressInDb, address);
                         }
