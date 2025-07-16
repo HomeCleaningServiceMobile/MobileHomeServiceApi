@@ -531,7 +531,7 @@ public class BookingController : ControllerBase
             if (bookingResult.Data.Staff == null || bookingResult.Data.Staff.Id != staffId)
                 return Forbid("You are not assigned to this booking");
 
-            // L?y v? trí staff (gi? s? có trong bookingResult.Data.Staff)
+            // L?y v? trï¿½ staff (gi? s? cï¿½ trong bookingResult.Data.Staff)
             var staffLat = bookingResult.Data.Staff.CurrentLatitude;
             var staffLng = bookingResult.Data.Staff.CurrentLongitude;
             var customerLat = bookingResult.Data.AddressLatitude;

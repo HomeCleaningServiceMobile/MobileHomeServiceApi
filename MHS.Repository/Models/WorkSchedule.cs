@@ -39,4 +39,5 @@ public class WorkSchedule : BaseEntity
     
     [ForeignKey(nameof(BookingId))]
     public virtual Booking? Booking { get; set; }
+
 } 
