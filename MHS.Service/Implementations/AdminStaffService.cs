@@ -38,12 +38,13 @@ public class AdminStaffService : IAdminStaffService
             // Build filter expression
             Expression<Func<Staff, bool>>? filter = null;
             if (!string.IsNullOrEmpty(request.SearchTerm) || !string.IsNullOrEmpty(request.EmployeeId) || 
-                request.IsAvailable.HasValue || request.Status.HasValue || request.IsDeleted.HasValue ||
+                request.IsAvailable.HasValue || request.Status.HasValue ||
                 request.HireDateFrom.HasValue || request.HireDateTo.HasValue ||
                 request.MinRating.HasValue || request.MaxRating.HasValue ||
                 !string.IsNullOrEmpty(request.Skills))
             {
                 filter = s => 
+                    !s.IsDeleted && 
                     (string.IsNullOrEmpty(request.SearchTerm) || 
                      s.User.FirstName.Contains(request.SearchTerm) ||
                      s.User.LastName.Contains(request.SearchTerm) ||
@@ -52,7 +53,6 @@ public class AdminStaffService : IAdminStaffService
                     (string.IsNullOrEmpty(request.EmployeeId) || s.EmployeeId == request.EmployeeId) &&
                     (!request.IsAvailable.HasValue || s.IsAvailable == request.IsAvailable.Value) &&
                     (!request.Status.HasValue || s.User.Status == request.Status.Value) &&
-                    (!request.IsDeleted.HasValue || s.IsDeleted == request.IsDeleted.Value) &&
                     (!request.HireDateFrom.HasValue || s.HireDate >= request.HireDateFrom.Value) &&
                     (!request.HireDateTo.HasValue || s.HireDate <= request.HireDateTo.Value) &&
                     (!request.MinRating.HasValue || s.AverageRating >= request.MinRating.Value) &&
@@ -148,7 +148,7 @@ public class AdminStaffService : IAdminStaffService
         try
         {
             var staff = await _unitOfWork.Repository<Staff>().ListAsync(
-                s => s.Id == staffId,
+                s => s.Id == staffId && !s.IsDeleted,
                 null,
                 q => q.Include(s => s.User)
                       .Include(s => s.StaffSkills)
@@ -302,7 +302,7 @@ public class AdminStaffService : IAdminStaffService
         try
         {
             var staffList = await _unitOfWork.Repository<Staff>()
-                .ListAsync(s => s.Id == staffId, null, 
+                .ListAsync(s => s.Id == staffId && !s.IsDeleted, null, 
                     q => q.Include(s => s.User));
 
             var staff = staffList.FirstOrDefault();
@@ -456,7 +456,7 @@ public class AdminStaffService : IAdminStaffService
         {
             var staffList = await _unitOfWork.Repository<Staff>()
                 .ListAsync(s => s.Id == staffId && !s.IsDeleted, null,
-                    q => q.Include(s => s.User).Include(s => s.Bookings));
+                    q => q.Include(s => s.User));
 
             var staff = staffList.FirstOrDefault();
             if (staff == null)

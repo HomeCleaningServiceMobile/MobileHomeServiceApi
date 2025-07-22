@@ -136,7 +136,6 @@ public class AdminStaffSearchRequest : PaginationRequest
     public string? EmployeeId { get; set; }
     public bool? IsAvailable { get; set; }
     public UserStatus? Status { get; set; }
-    public bool? IsDeleted { get; set; }
     public DateTime? HireDateFrom { get; set; }
     public DateTime? HireDateTo { get; set; }
     public decimal? MinRating { get; set; }
