@@ -1,4 +1,5 @@
 using MHS.Service.DTOs;
+using MHS.Common.Enums;
 
 namespace MHS.Service.Interfaces;
 
@@ -12,18 +13,18 @@ public interface IBookingService
     Task<AppResponse<string>> CancelBookingAsync(int id, string reason, CancellationToken cancellationToken = default);
     
     // Staff operations
-    Task<AppResponse<string>> RespondToBookingAsync(int staffId, StaffResponseRequest request, CancellationToken cancellationToken = default);
-    Task<AppResponse<string>> CheckInAsync(int staffId, CheckInRequest request, CancellationToken cancellationToken = default);
-    Task<AppResponse<string>> CheckOutAsync(int staffId, CheckOutRequest request, CancellationToken cancellationToken = default);
-    Task<AppResponse<List<BookingSummaryResponse>>> GetStaffBookingsAsync(int staffId, BookingListRequest request, CancellationToken cancellationToken = default);
+    Task<AppResponse<string>> RespondToBookingAsync(int userId, StaffResponseRequest request, CancellationToken cancellationToken = default);
+    Task<AppResponse<string>> CheckInAsync(int userId, CheckInRequest request, CancellationToken cancellationToken = default);
+    Task<AppResponse<string>> CheckOutAsync(int userId, CheckOutRequest request, CancellationToken cancellationToken = default);
+    Task<AppResponse<List<BookingSummaryResponse>>> GetStaffBookingsAsync(int userId, BookingListRequest request, CancellationToken cancellationToken = default);
     
     // Auto-assignment system
     Task<AppResponse<string>> AutoAssignStaffAsync(int bookingId, CancellationToken cancellationToken = default);
     Task<AppResponse<List<StaffResponse>>> FindAvailableStaffAsync(int serviceId, DateTime scheduledDate, TimeSpan scheduledTime, decimal latitude, decimal longitude, CancellationToken cancellationToken = default);
     
     // Admin operations
-    Task<AppResponse<string>> ManualAssignStaffAsync(int bookingId, int staffId, CancellationToken cancellationToken = default);
     Task<AppResponse<List<BookingSummaryResponse>>> GetAllBookingsAsync(BookingListRequest request, CancellationToken cancellationToken = default);
+    Task<AppResponse<string>> ManualAssignStaffAsync(int bookingId, int staffId, CancellationToken cancellationToken = default);
     Task<AppResponse<string>> ForceCompleteBookingAsync(int id, string reason, CancellationToken cancellationToken = default);
     
     // Booking flow management

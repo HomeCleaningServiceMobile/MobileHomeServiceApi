@@ -6,6 +6,7 @@ using MHS.Common.Enums;
 using MHS.Repository.Data;
 using MHS.Repository.Models;
 using MHS.Service.DTOs;
+using AutoMapper;
 
 namespace MobileHomeServiceApi.Controllers;
 
@@ -17,17 +18,20 @@ public class DataManagementController : ControllerBase
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly ILogger<DataManagementController> _logger;
+    private readonly IMapper _mapper;
 
     public DataManagementController(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
-        ILogger<DataManagementController> logger)
+        ILogger<DataManagementController> logger,
+        IMapper mapper)
     {
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
         _logger = logger;
+        _mapper = mapper;
     }
 
     /// <summary>
@@ -43,7 +47,8 @@ public class DataManagementController : ControllerBase
             await SeedUsersAsync();
             await SeedCustomerAddressesAsync();
             await SeedStaffSkillsAsync();
-            await SeedWorkSchedulesAsync();
+            await SeedBusinessHoursAsync();
+            await SeedStandardWorkSchedulesAsync();
             await SeedBookingsAsync();
             await SeedPaymentsAsync();
             await SeedReviewsAsync();
@@ -141,6 +146,169 @@ public class DataManagementController : ControllerBase
     }
 
     /// <summary>
+    /// Seed business hours
+    /// </summary>
+    [HttpPost("seed-business-hours")]
+    public async Task<IActionResult> SeedBusinessHours()
+    {
+        try
+        {
+            await SeedBusinessHoursAsync();
+            return Ok(new AppResponse<string>()
+                .SetSuccessResponse("Business hours seeded successfully"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error seeding business hours");
+            return StatusCode(500, new AppResponse<string>()
+                .SetErrorResponse("Error", "An error occurred while seeding business hours"));
+        }
+    }
+
+    /// <summary>
+    /// Seed work schedules for staff
+    /// </summary>
+    [HttpPost("seed-work-schedules")]
+    public async Task<IActionResult> SeedWorkSchedules()
+    {
+        try
+        {
+            await SeedStandardWorkSchedulesAsync();
+            return Ok(new AppResponse<string>()
+                .SetSuccessResponse("Work schedules seeded successfully"));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error seeding work schedules");
+            return StatusCode(500, new AppResponse<string>()
+                .SetErrorResponse("Error", "An error occurred while seeding work schedules"));
+        }
+    }
+
+    /// <summary>
+    /// Get current business hours
+    /// </summary>
+    [HttpGet("business-hours")]
+    public async Task<IActionResult> GetBusinessHours()
+    {
+        try
+        {
+            var businessHours = await _context.BusinessHours
+                .OrderBy(bh => bh.DayOfWeek)
+                .ToListAsync();
+
+            var businessHoursResponse = _mapper.Map<List<BusinessHoursResponse>>(businessHours);
+
+            return Ok(new AppResponse<List<BusinessHoursResponse>>()
+                .SetSuccessResponse(businessHoursResponse));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving business hours");
+            return StatusCode(500, new AppResponse<List<BusinessHoursResponse>>()
+                .SetErrorResponse("Error", "An error occurred while retrieving business hours"));
+        }
+    }
+
+    /// <summary>
+    /// Get work schedules for all staff
+    /// </summary>
+    [HttpGet("work-schedules")]
+    public async Task<IActionResult> GetWorkSchedules()
+    {
+        try
+        {
+            var workSchedules = await _context.WorkSchedules
+                .Include(ws => ws.Staff)
+                .ThenInclude(s => s.User)
+                .OrderBy(ws => ws.StaffId)
+                .ThenBy(ws => ws.DayOfWeek)
+                .ToListAsync();
+
+            var workSchedulesResponse = _mapper.Map<List<WorkScheduleResponse>>(workSchedules);
+
+            return Ok(new AppResponse<List<WorkScheduleResponse>>()
+                .SetSuccessResponse(workSchedulesResponse));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving work schedules");
+            return StatusCode(500, new AppResponse<List<WorkScheduleResponse>>()
+                .SetErrorResponse("Error", "An error occurred while retrieving work schedules"));
+        }
+    }
+
+    /// <summary>
+    /// Get work schedules for a specific staff member
+    /// </summary>
+    [HttpGet("work-schedules/staff/{staffId}")]
+    public async Task<IActionResult> GetWorkSchedulesByStaff(int staffId)
+    {
+        try
+        {
+            var workSchedules = await _context.WorkSchedules
+                .Include(ws => ws.Staff)
+                .ThenInclude(s => s.User)
+                .Where(ws => ws.StaffId == staffId)
+                .OrderBy(ws => ws.DayOfWeek)
+                .ToListAsync();
+
+            if (!workSchedules.Any())
+            {
+                return NotFound(new AppResponse<List<WorkScheduleResponse>>()
+                    .SetErrorResponse("NotFound", $"No work schedules found for staff ID {staffId}"));
+            }
+
+            var workSchedulesResponse = _mapper.Map<List<WorkScheduleResponse>>(workSchedules);
+
+            return Ok(new AppResponse<List<WorkScheduleResponse>>()
+                .SetSuccessResponse(workSchedulesResponse));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving work schedules for staff {StaffId}", staffId);
+            return StatusCode(500, new AppResponse<List<WorkScheduleResponse>>()
+                .SetErrorResponse("Error", "An error occurred while retrieving work schedules"));
+        }
+    }
+
+    /// <summary>
+    /// Get business hours for a specific day
+    /// </summary>
+    [HttpGet("business-hours/day/{dayOfWeek}")]
+    public async Task<IActionResult> GetBusinessHoursByDay(int dayOfWeek)
+    {
+        try
+        {
+            if (dayOfWeek < 0 || dayOfWeek > 6)
+            {
+                return BadRequest(new AppResponse<BusinessHoursResponse>()
+                    .SetErrorResponse("Validation", "Day of week must be between 0 (Sunday) and 6 (Saturday)"));
+            }
+
+            var businessHours = await _context.BusinessHours
+                .FirstOrDefaultAsync(bh => bh.DayOfWeek == dayOfWeek);
+
+            if (businessHours == null)
+            {
+                return NotFound(new AppResponse<BusinessHoursResponse>()
+                    .SetErrorResponse("NotFound", $"No business hours found for day {dayOfWeek}"));
+            }
+
+            var businessHoursResponse = _mapper.Map<BusinessHoursResponse>(businessHours);
+
+            return Ok(new AppResponse<BusinessHoursResponse>()
+                .SetSuccessResponse(businessHoursResponse));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving business hours for day {DayOfWeek}", dayOfWeek);
+            return StatusCode(500, new AppResponse<BusinessHoursResponse>()
+                .SetErrorResponse("Error", "An error occurred while retrieving business hours"));
+        }
+    }
+
+    /// <summary>
     /// Clear all data
     /// </summary>
     [HttpDelete("clear-all")]
@@ -154,6 +322,7 @@ public class DataManagementController : ControllerBase
             _context.Payments.RemoveRange(_context.Payments);
             _context.Bookings.RemoveRange(_context.Bookings);
             _context.WorkSchedules.RemoveRange(_context.WorkSchedules);
+            _context.BusinessHours.RemoveRange(_context.BusinessHours);
             _context.StaffSkills.RemoveRange(_context.StaffSkills);
             _context.CustomerAddresses.RemoveRange(_context.CustomerAddresses);
             _context.CustomerPaymentMethods.RemoveRange(_context.CustomerPaymentMethods);
@@ -547,28 +716,64 @@ public class DataManagementController : ControllerBase
         }
     }
 
-    private async Task SeedWorkSchedulesAsync()
+
+    private async Task SeedBusinessHoursAsync()
+    {
+        if (!await _context.BusinessHours.AnyAsync())
+        {
+            var businessHours = new List<BusinessHours>
+            {
+                new BusinessHours { DayOfWeek = 1, OpenTime = new TimeSpan(8, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsClosed = false, IsActive = true }, // Monday
+                new BusinessHours { DayOfWeek = 2, OpenTime = new TimeSpan(8, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsClosed = false, IsActive = true }, // Tuesday
+                new BusinessHours { DayOfWeek = 3, OpenTime = new TimeSpan(8, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsClosed = false, IsActive = true }, // Wednesday
+                new BusinessHours { DayOfWeek = 4, OpenTime = new TimeSpan(8, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsClosed = false, IsActive = true }, // Thursday
+                new BusinessHours { DayOfWeek = 5, OpenTime = new TimeSpan(8, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsClosed = false, IsActive = true }, // Friday
+                new BusinessHours { DayOfWeek = 6, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(17, 0, 0), IsClosed = false, IsActive = true }, // Saturday
+                new BusinessHours { DayOfWeek = 0, OpenTime = new TimeSpan(9, 0, 0), CloseTime = new TimeSpan(18, 0, 0), IsClosed = true, IsActive = true }   // Sunday (Closed)
+            };
+
+            _context.BusinessHours.AddRange(businessHours);
+            await _context.SaveChangesAsync();
+        }
+    }
+    private async Task SeedStandardWorkSchedulesAsync()
     {
         if (!await _context.WorkSchedules.AnyAsync())
         {
             var staffs = await _context.Staffs.ToListAsync();
             var schedules = new List<WorkSchedule>();
+            var random = new Random();
 
             foreach (var staff in staffs)
             {
-                // Create weekly schedule for each staff
-                for (int dayOffset = 0; dayOffset < 7; dayOffset++)
+                var staffIndex = staffs.IndexOf(staff);
+                
+                int[] workingDays = staffIndex  switch
                 {
-                    var scheduleDate = DateTime.UtcNow.Date.AddDays(dayOffset);
+                    0 => new[] { 1, 2, 3, 4, 5 },
+                    1 => new[] { 1, 2, 3, 4, 5, 6 }, 
+                    _ => new[] { 2, 3, 4, 5, 6 } 
+                };
+
+                foreach (var dayOfWeek in workingDays)
+                {
+                    var startHour = 8 + (staffIndex % 2); // 8 or 9 AM
+                    var endHour = 17 + (staffIndex % 2); // 5 or 6 PM
                     
+                    // Saturday has shorter hours
+                    if (dayOfWeek == 6)
+                    {
+                        startHour = 9;
+                        endHour = 16;
+                    }
+
                     schedules.Add(new WorkSchedule
                     {
                         StaffId = staff.Id,
-                        WorkDate = scheduleDate,
-                        StartTime = TimeSpan.FromHours(8), // 8 AM
-                        EndTime = TimeSpan.FromHours(17), // 5 PM
-                        Status = WorkScheduleStatus.Available,
-                        IsRecurring = false
+                        DayOfWeek = dayOfWeek,
+                        StartTime = new TimeSpan(startHour, 0, 0),
+                        EndTime = new TimeSpan(endHour, 0, 0),
+                        IsActive = true,
                     });
                 }
             }
@@ -577,7 +782,6 @@ public class DataManagementController : ControllerBase
             await _context.SaveChangesAsync();
         }
     }
-
     private async Task SeedBookingsAsync()
     {
         if (!await _context.Bookings.AnyAsync())

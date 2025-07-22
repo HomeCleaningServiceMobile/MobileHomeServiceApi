@@ -129,11 +129,12 @@ builder.Services.AddScoped<IUserContext, UserContext>();
 builder.Services.AddScoped<IBookingService, BookingService>();
 builder.Services.AddScoped<IServiceManagementService, ServiceManagementService>();
 builder.Services.AddScoped<IStripeService, StripeService>();
+builder.Services.AddScoped<IVNPayService, VNPayService>();
 builder.Services.AddScoped<IMapboxService, MapboxService>();
 builder.Services.AddScoped<IStaffService, StaffService>();
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
-
+builder.Services.AddScoped<IAvailabilityService, AvailabilityService>();
 // Additional services
 builder.Services.AddMemoryCache();
 builder.Services.AddHttpContextAccessor();
