@@ -305,4 +305,18 @@ public class AuthController : ControllerBase
                 .SetErrorResponse("Error", "An error occurred during logout"));
         }
     }
-} 
+
+    /// <summary>
+    /// Google login (auto-register if not exists)
+    /// </summary>
+    [HttpPost("google-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+    {
+        var result = await _userService.GoogleLoginAsync(request);
+        if (!result.IsSucceeded)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+}

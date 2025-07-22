@@ -29,8 +29,10 @@ public interface IUserService
     Task<AppResponse<string>> ActivateUserAsync(int id, CancellationToken cancellationToken = default);
     Task<AppResponse<string>> DeactivateUserAsync(int id, CancellationToken cancellationToken = default);
     Task<AppResponse<string>> SuspendUserAsync(int id, string reason, CancellationToken cancellationToken = default);
-    
+
+    Task<AppResponse<GoogleLoginResponse>> GoogleLoginAsync(GoogleLoginRequest request);
+
     //// Helper methods for getting Customer/Staff IDs from User ID
     //Task<AppResponse<int>> GetCustomerIdByUserIdAsync(int userId, CancellationToken cancellationToken = default);
     //Task<AppResponse<int>> GetStaffIdByUserIdAsync(int userId, CancellationToken cancellationToken = default);
-} 
+}

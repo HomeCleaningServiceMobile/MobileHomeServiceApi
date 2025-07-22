@@ -571,41 +571,59 @@ public class BookingService : IBookingService
                 includeProperties: q => q.Include(ss => ss.Staff).ThenInclude(s => s.User)
             );
 
-            var availableStaff = new List<Staff>();
+            if (staffWithSkills == null || !staffWithSkills.Any())
+            {
+                return new AppResponse<List<StaffResponse>>()
+                    .SetErrorResponse("Staff", "No staff found with the required skills for this service");
+            }
+
+            var availableStaff = new List<(Staff Staff, double Score)>();
+
 
             foreach (var staffSkill in staffWithSkills)
             {
                 var staff = staffSkill.Staff;
-                
-                // Check if staff is available (not banned, active, etc.)
+
                 if (staff.User.Status != UserStatus.Active || !staff.IsAvailable)
                     continue;
 
-                // Check if staff is within service radius (simplified distance check)
+                double distance = double.MaxValue;
                 if (staff.CurrentLatitude.HasValue && staff.CurrentLongitude.HasValue)
                 {
-                    var distance = CalculateDistance(
+                    distance = CalculateDistance(
                         (double)latitude, (double)longitude,
                         (double)staff.CurrentLatitude.Value, (double)staff.CurrentLongitude.Value);
-                    
+
                     if (distance > staff.ServiceRadiusKm)
                         continue;
                 }
 
-                // Check if staff has no conflicting bookings
                 var hasConflict = await _unitOfWork.Repository<Booking>().ExistsAsync(b =>
                     b.StaffId == staff.Id &&
                     b.ScheduledDate == scheduledDate &&
                     b.Status != BookingStatus.Cancelled &&
                     b.Status != BookingStatus.Completed);
 
-                if (!hasConflict)
-                {
-                    availableStaff.Add(staff);
-                }
+                if (hasConflict)
+                    continue;
+
+                //Cal Score
+                double score = 0;
+                score += (distance > 0 ? (1 / distance) * 30 : 30); 
+                score += (double) staff.AverageRating * 30;                         
+                score += staff.TotalCompletedJobs * 0.5;         
+                //score += staff.ResponseRate * 10;               
+
+                availableStaff.Add((staff, score));
             }
 
-            var response = _mapper.Map<List<StaffResponse>>(availableStaff);
+            //Sort by best match first
+            var sortedStaff = availableStaff
+                .OrderByDescending(s => s.Score)
+                .Select(s => s.Staff)
+                .ToList();
+
+            var response = _mapper.Map<List<StaffResponse>>(sortedStaff);
             return new AppResponse<List<StaffResponse>>()
                 .SetSuccessResponse(response);
         }
