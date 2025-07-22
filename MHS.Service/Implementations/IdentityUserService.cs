@@ -569,6 +569,90 @@ public class IdentityUserService : IUserService
         }
     }
 
+    public async Task<AppResponse<GoogleLoginResponse>> GoogleLoginAsync(GoogleLoginRequest request)
+    {
+        try
+        {
+            var user = await _userManager.FindByEmailAsync(request.Email);
+
+            if (user == null)
+            {
+                // Auto-register the user
+                user = new ApplicationUser
+                {
+                    UserName = request.Email,
+                    Email = request.Email,
+                    FirstName = request.FullName.Split(' ')[0],
+                    LastName = request.FullName.Contains(' ')
+                        ? request.FullName.Substring(request.FullName.IndexOf(' ') + 1)
+                        : "",
+                    ProfileImageUrl = request.ProfileImageUrl,
+                    Role = UserRole.Customer, // Default role
+                    Status = UserStatus.Active,
+                    EmailConfirmed = true, // Google already verifies emails
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                // Create user without password (Google auth only)
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    return new AppResponse<GoogleLoginResponse>()
+                        .SetErrorResponse("Registration", "Failed to auto-register Google user");
+                }
+
+                // Optionally: create customer profile if you need
+                var customer = new Customer
+                {
+                    UserId = user.Id,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _unitOfWork.Repository<Customer>().AddAsync(customer);
+                await _unitOfWork.CompleteAsync();
+            }
+
+            if (user.Status != UserStatus.Active)
+            {
+                return new AppResponse<GoogleLoginResponse>()
+                    .SetErrorResponse("Account", "Account is not active");
+            }
+
+            // Issue tokens
+            var token = _userTokenService.CreateAccessToken(user, user.Role.ToString());
+            var refreshToken = _userTokenService.CreateRefreshToken(user);
+            var expiresAt = _userTokenService.GetAccessTokenExpiration();
+
+            var response = new GoogleLoginResponse
+            {
+                User = new UserResponse
+                {
+                    Id = user.Id,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email!,
+                    PhoneNumber = user.PhoneNumber!,
+                    Role = user.Role,
+                    Status = user.Status,
+                    ProfileImageUrl = user.ProfileImageUrl,
+                    LastLoginAt = DateTime.UtcNow,
+                    EmailVerifiedAt = DateTime.UtcNow,
+                    CreatedAt = user.CreatedAt
+                },
+                AccessToken = token,
+                RefreshToken = refreshToken,
+                ExpiresAt = expiresAt
+            };
+
+            return new AppResponse<GoogleLoginResponse>()
+                .SetSuccessResponse(response, "Success", "Google login successful");
+        }
+        catch (Exception)
+        {
+            return new AppResponse<GoogleLoginResponse>()
+                .SetErrorResponse("Error", "An error occurred during Google login");
+        }
+    }
+
     public async Task<AppResponse<RegisterResponse>> RegisterStaffAsync(StaffRegistrationRequest request, CancellationToken cancellationToken = default)
     {
         try
