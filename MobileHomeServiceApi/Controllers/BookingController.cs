@@ -484,6 +484,30 @@ public class BookingController : ControllerBase
     }
 
     /// <summary>
+    /// Get staff bookings (Staff role only)
+    /// </summary>
+    /// <param name="request">Booking list request parameters</param>
+    /// <returns>Staff bookings with pagination</returns>
+    [HttpGet("staff")]
+    [Authorize(Roles = "Staff")]
+    public async Task<IActionResult> GetStaffBookings([FromQuery] BookingListRequest request)
+    {
+        try
+        {
+            // Get user ID from claims (Staff role)
+            var userId = GetCurrentUserId();
+
+            var result = await _bookingService.GetStaffBookingsAsync(userId, request);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving staff bookings for current user");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
     /// Get staff bookings
     /// </summary>
     /// <param name="staffId">Staff ID</param>
