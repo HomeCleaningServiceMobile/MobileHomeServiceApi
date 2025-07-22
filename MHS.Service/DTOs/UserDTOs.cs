@@ -199,6 +199,8 @@ public class StaffRegistrationRequest
     public int ExperienceYears { get; set; }
     public decimal HourlyRate { get; set; }
     public int ServiceRadiusKm { get; set; } = 10;
+    public string? Skills { get; set; }
+    public string? Bio { get; set; }
 }
 
 public class UpdateProfileRequest

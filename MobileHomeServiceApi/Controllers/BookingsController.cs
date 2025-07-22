@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using MHS.Service.Interfaces;
 using MHS.Service.DTOs;
+using MHS.Repository.Interfaces;
+using MHS.Repository.Models;
 
 namespace MobileHomeServiceApi.Controllers;
 
@@ -11,11 +13,13 @@ namespace MobileHomeServiceApi.Controllers;
 public class BookingsController : ControllerBase
 {
     private readonly IBookingService _bookingService;
+    private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<BookingsController> _logger;
 
-    public BookingsController(IBookingService bookingService, ILogger<BookingsController> logger)
+    public BookingsController(IBookingService bookingService, IUnitOfWork unitOfWork, ILogger<BookingsController> logger)
     {
         _bookingService = bookingService;
+        _unitOfWork = unitOfWork;
         _logger = logger;
     }
 
@@ -32,10 +36,8 @@ public class BookingsController : ControllerBase
             return BadRequest("Invalid user ID");
         }
 
-        // TODO: Get customer ID from user ID
-        var customerId = userId; // This should be mapped to actual customer ID
-
-        var result = await _bookingService.CreateBookingAsync(customerId, request, cancellationToken);
+        // Pass user ID directly to service (service will handle customer creation if needed)
+        var result = await _bookingService.CreateBookingAsync(userId, request, cancellationToken);
         return result.IsSucceeded ? CreatedAtAction(nameof(GetBookingById), new { id = result.Data?.Id }, result) : BadRequest(result);
     }
 
@@ -85,17 +87,14 @@ public class BookingsController : ControllerBase
     [HttpPost("respond")]
     public async Task<IActionResult> RespondToBooking([FromBody] StaffResponseRequest request, CancellationToken cancellationToken = default)
     {
-        // Get staff ID from claims (assuming Staff role)
+        // Get user ID from claims (Staff role)
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (!int.TryParse(userIdClaim, out var userId))
         {
             return BadRequest("Invalid user ID");
         }
 
-        // TODO: Get staff ID from user ID
-        var staffId = userId; // This should be mapped to actual staff ID
-
-        var result = await _bookingService.RespondToBookingAsync(staffId, request, cancellationToken);
+        var result = await _bookingService.RespondToBookingAsync(userId, request, cancellationToken);
         return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
@@ -105,16 +104,14 @@ public class BookingsController : ControllerBase
     [HttpPost("check-in")]
     public async Task<IActionResult> CheckIn([FromBody] CheckInRequest request, CancellationToken cancellationToken = default)
     {
-        // Get staff ID from claims
+        // Get user ID from claims
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (!int.TryParse(userIdClaim, out var userId))
         {
             return BadRequest("Invalid user ID");
         }
 
-        var staffId = userId; // This should be mapped to actual staff ID
-
-        var result = await _bookingService.CheckInAsync(staffId, request, cancellationToken);
+        var result = await _bookingService.CheckInAsync(userId, request, cancellationToken);
         return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
@@ -124,16 +121,14 @@ public class BookingsController : ControllerBase
     [HttpPost("check-out")]
     public async Task<IActionResult> CheckOut([FromBody] CheckOutRequest request, CancellationToken cancellationToken = default)
     {
-        // Get staff ID from claims
+        // Get user ID from claims
         var userIdClaim = User.FindFirst("UserId")?.Value;
         if (!int.TryParse(userIdClaim, out var userId))
         {
             return BadRequest("Invalid user ID");
         }
 
-        var staffId = userId; // This should be mapped to actual staff ID
-
-        var result = await _bookingService.CheckOutAsync(staffId, request, cancellationToken);
+        var result = await _bookingService.CheckOutAsync(userId, request, cancellationToken);
         return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 
@@ -208,6 +203,24 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> ForceCompleteBooking(int id, [FromBody] string reason, CancellationToken cancellationToken = default)
     {
         var result = await _bookingService.ForceCompleteBookingAsync(id, reason, cancellationToken);
+        return result.IsSucceeded ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Get staff bookings (Staff role only)
+    /// </summary>
+    [HttpGet("staff")]
+    [Authorize(Roles = "Staff")]
+    public async Task<IActionResult> GetStaffBookings([FromQuery] BookingListRequest request, CancellationToken cancellationToken = default)
+    {
+        // Get user ID from claims (Staff role)
+        var userIdClaim = User.FindFirst("UserId")?.Value;
+        if (!int.TryParse(userIdClaim, out var userId))
+        {
+            return BadRequest("Invalid user ID");
+        }
+
+        var result = await _bookingService.GetStaffBookingsAsync(userId, request, cancellationToken);
         return result.IsSucceeded ? Ok(result) : BadRequest(result);
     }
 } 

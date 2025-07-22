@@ -31,6 +31,8 @@ public class CreateBookingRequest
     public string? SpecialInstructions { get; set; }
     
     public PaymentMethod PreferredPaymentMethod { get; set; }
+    
+    public int? UserId { get; set; }
 }
 
 public class UpdateBookingRequest
@@ -106,7 +108,6 @@ public class BookingResponse
     public DateTime? StartedAt { get; set; }
     public DateTime? CompletedAt { get; set; }
     public DateTime? CancelledAt { get; set; }
-    public string? CancellationReason { get; set; }
     public DateTime CreatedAt { get; set; }
     public decimal AddressLatitude { get; set; }
     public decimal AddressLongitude { get; set; }
