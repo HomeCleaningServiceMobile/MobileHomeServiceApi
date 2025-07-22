@@ -41,7 +41,7 @@ namespace MHS.Service.Implementations
 
         public VNPayResponse CreatePaymentUrl(VNPayRequest body)
         {
-            string returnUrl = "http://10.0.2.2:5233/api/payment/vnpay/callback";
+            string returnUrl = "http://10.0.2.2:5233/api/payment/vnpay/confirm";
             ExchangRate exchangRate = new ExchangRate();
             double exchangeRate = exchangRate.GetUsdToVndExchangeRateAsync().Result;
             var AmountInUsd = Convert.ToDouble(body.Amount, CultureInfo.InvariantCulture);
@@ -126,21 +126,31 @@ namespace MHS.Service.Implementations
         {
             var response = new AppResponse<PaymentConfirmationResponse>();
 
-            if (!ValidateCallback(callback))
-            {
-                return response.SetErrorResponse("Validation", "Invalid VNPay callback signature");
-            }
-
-            if (callback.vnp_ResponseCode != "00" || callback.vnp_TransactionStatus != "00")
-            {
-                return response.SetErrorResponse("Payment", $"VNPay payment failed with response code: {callback.vnp_ResponseCode}");
-            }
-
             try
             {
-                var customer = await _customerRepository.GetEntityByIdAsync(customerId);
+                var payment = await _paymentRepository.FindAsync(p => p.BookingId == bookingId);
+
+                var customer = await  _customerRepository.FindAsync(c => c.UserId == customerId);
+                var realCus = await _customerRepository.FindAsync(c => c.UserId == customerId);
+                if (payment == null)
+                {
+                    payment.Status = MHS.Common.Enums.PaymentStatus.Failed;
+                    payment.PaidAt = DateTime.Now;
+                    payment.GatewayTransactionId = callback.vnp_TransactionNo;
+                    _paymentRepository.Update(payment);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+
+                    return response.SetErrorResponse("Payment", "Payment not found");
+
+                }
                 if (customer == null)
                 {
+                    payment.Status = MHS.Common.Enums.PaymentStatus.Failed;
+                    payment.PaidAt = DateTime.Now;
+                    payment.GatewayTransactionId = callback.vnp_TransactionNo;
+                    _paymentRepository.Update(payment);
+                    await _unitOfWork.CompleteAsync(cancellationToken);
+
                     return response.SetErrorResponse("Customer", "Customer not found");
                 }
 
@@ -161,7 +171,6 @@ namespace MHS.Service.Implementations
                 customer.TotalSpent += amount;
                 _customerRepository.Update(customer);
 
-                var payment = await _paymentRepository.FindAsync(p => p.BookingId == bookingId);
                 if (payment != null)
                 {
                     payment.Status = MHS.Common.Enums.PaymentStatus.Paid;
