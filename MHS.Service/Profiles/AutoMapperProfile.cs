@@ -68,7 +68,17 @@ public class AutoMapperProfile : Profile
         // Work Schedule mappings
         CreateMap<WorkSchedule, WorkScheduleResponse>()
             .ForMember(dest => dest.Staff, opt => opt.MapFrom(src => src.Staff))
-            .ForMember(dest => dest.Booking, opt => opt.MapFrom(src => src.Booking));
+            .ForMember(dest => dest.DayName, opt => opt.MapFrom(src => src.DayName))
+            .ForMember(dest => dest.WorkDuration, opt => opt.MapFrom(src => src.WorkDuration))
+            .ForMember(dest => dest.WorkHours, opt => opt.MapFrom(src => src.WorkHours))
+            .ForMember(dest => dest.IsWorkingNow, opt => opt.MapFrom(src => src.IsWorkingNow))
+            .ForMember(dest => dest.ScheduleDisplay, opt => opt.MapFrom(src => src.ScheduleDisplay));
+
+        // Business Hours mappings
+        CreateMap<BusinessHours, BusinessHoursResponse>()
+            .ForMember(dest => dest.DayName, opt => opt.MapFrom(src => src.DayName))
+            .ForMember(dest => dest.IsCurrentlyOpen, opt => opt.MapFrom(src => src.IsCurrentlyOpen))
+            .ForMember(dest => dest.TimeDisplay, opt => opt.MapFrom(src => src.TimeDisplay));
 
         // Admin mappings
         CreateMap<Admin, AdminResponse>()

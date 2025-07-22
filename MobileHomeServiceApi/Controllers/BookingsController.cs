@@ -36,7 +36,7 @@ public class BookingsController : ControllerBase
         var customerId = userId; // This should be mapped to actual customer ID
 
         var result = await _bookingService.CreateBookingAsync(customerId, request, cancellationToken);
-        return result.IsSucceeded ? CreatedAtAction(nameof(GetBookingById), new { id = result.Data?.Id }, result) : BadRequest(result);
+        return result.IsSucceeded ? Ok(result.Data.Id) : BadRequest(result);
     }
 
     /// <summary>

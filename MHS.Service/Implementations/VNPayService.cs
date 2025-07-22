@@ -30,7 +30,7 @@ namespace MHS.Service.Implementations
         {
             _configuration = configuration;
             _vnpUrl = _configuration["VNPay:Url"] ?? "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-            _vnpReturnUrl = _configuration["VNPay:ReturnUrl"] ?? "http://localhost:5000/api/payment/vnpay/callback";
+            _vnpReturnUrl = _configuration["VNPay:ReturnUrl"] ?? "http://localhost:5233/api/payment/vnpay/callback";
             _vnpTmnCode = _configuration["VNPay:TmnCode"] ?? "";
             _vnpHashSecret = _configuration["VNPay:HashSecret"] ?? "";
             _unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
@@ -41,7 +41,7 @@ namespace MHS.Service.Implementations
 
         public VNPayResponse CreatePaymentUrl(VNPayRequest body)
         {
-            string returnUrl = "http://10.0.2.2:5096/api/payment/vnpay/callback";
+            string returnUrl = "http://10.0.2.2:5233/api/payment/vnpay/callback";
             ExchangRate exchangRate = new ExchangRate();
             double exchangeRate = exchangRate.GetUsdToVndExchangeRateAsync().Result;
             var AmountInUsd = Convert.ToDouble(body.Amount, CultureInfo.InvariantCulture);
@@ -56,7 +56,7 @@ namespace MHS.Service.Implementations
             vnPay.AddRequestData("vnp_CurrCode", "VND");
             vnPay.AddRequestData("vnp_IpAddr", "127.0.0.1");
             vnPay.AddRequestData("vnp_Locale", "vn");
-            vnPay.AddRequestData("vnp_OrderInfo", body.BookingId);
+            vnPay.AddRequestData("vnp_OrderInfo", "string");
             vnPay.AddRequestData("vnp_OrderType", "other");
             vnPay.AddRequestData("vnp_ReturnUrl", returnUrl);
             vnPay.AddRequestData("vnp_TmnCode", _vnpTmnCode);
