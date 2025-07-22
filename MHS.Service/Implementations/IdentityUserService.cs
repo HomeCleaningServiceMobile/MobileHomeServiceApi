@@ -613,7 +613,14 @@ public class IdentityUserService : IUserService
                 HireDate = DateTime.UtcNow,
                 HourlyRate = request.HourlyRate,
                 ServiceRadiusKm = request.ServiceRadiusKm,
-                IsAvailable = false, // Not available until approved
+                IsAvailable = true, // Available immediately after registration
+                Skills = request.Skills,
+                Bio = request.Bio,
+                FullAddress = $"{request.Address}, {request.Ward}, {request.District}, {request.Province}",
+                Street = request.Address,
+                District = request.District,
+                City = request.Ward, // Map Ward to City
+                Province = request.Province,
                 CreatedAt = DateTime.UtcNow
             };
 
