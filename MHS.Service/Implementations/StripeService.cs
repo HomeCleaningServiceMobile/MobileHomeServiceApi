@@ -8,6 +8,7 @@ using Stripe;
 using MHS.Service.Interfaces;
 using MHS.Repository.Interfaces;
 using MHS.Repository.Implementations;
+using MHS.Service.DTOs;
 
 
 namespace MHS.Service.Implementations
@@ -31,21 +32,32 @@ namespace MHS.Service.Implementations
             StripeConfiguration.ApiKey = _secretKey;
         }
 
-        public async Task<bool> ConfirmPaymentAndDeductBalance(string paymentIntentId, int customerId, int bookingId, CancellationToken cancellationToken = default)
+        public async Task<AppResponse<PaymentConfirmationResponse>> ConfirmPaymentAndDeductBalance(string paymentIntentId, int customerId, int bookingId, CancellationToken cancellationToken = default)
         {
-            var paymentIntentService = new PaymentIntentService();
-            var paymentIntent = await paymentIntentService.GetAsync(paymentIntentId, cancellationToken: cancellationToken);
+            var response = new AppResponse<PaymentConfirmationResponse>();
 
-            if (paymentIntent.Status == "succeeded")
+            try
             {
+                var paymentIntentService = new PaymentIntentService();
+                var paymentIntent = await paymentIntentService.GetAsync(paymentIntentId, cancellationToken: cancellationToken);
+
+                if (paymentIntent.Status != "succeeded")
+                {
+                    return response.SetErrorResponse("Payment", $"Stripe payment not successful. Status: {paymentIntent.Status}");
+                }
+
                 var customer = await _customerRepository.GetEntityByIdAsync(customerId);
                 if (customer == null)
-                    throw new Exception("Customer not found");
+                {
+                    return response.SetErrorResponse("Customer", "Customer not found");
+                }
 
                 decimal amount = paymentIntent.AmountReceived / 100m;
 
                 if (customer.Balance < amount)
-                    throw new Exception("Insufficient balance");
+                {
+                    return response.SetErrorResponse("Balance", $"Insufficient balance. Required: ${amount:F2}, Available: ${customer.Balance:F2}");
+                }
 
                 customer.Balance -= amount;
                 customer.TotalSpent += amount;
@@ -55,7 +67,7 @@ namespace MHS.Service.Implementations
                 if (payment != null) 
                 {
                     payment.Status = MHS.Common.Enums.PaymentStatus.Paid;
-                    payment.PaidAt = DateTime.UtcNow;
+                    payment.PaidAt = DateTime.Now; //Change from UtcNow to Now 
                     payment.GatewayTransactionId = paymentIntent.Id;
                     _paymentRepository.Update(payment);
                 }
@@ -68,9 +80,25 @@ namespace MHS.Service.Implementations
                 }
 
                 await _unitOfWork.CompleteAsync(cancellationToken);
-                return true;
+
+                var confirmationData = new PaymentConfirmationResponse
+                {
+                    IsConfirmed = true,
+                    TransactionId = paymentIntent.Id,
+                    AmountDeducted = amount,
+                    RemainingBalance = customer.Balance,
+                    BookingId = bookingId,
+                    BookingStatus = booking?.Status.ToString() ?? "Unknown",
+                    PaymentProvider = "Stripe",
+                    ConfirmedAt = DateTime.Now
+                };
+
+                return response.SetSuccessResponse(confirmationData, "Success", "Stripe payment confirmed and balance deducted successfully");
             }
-            return false;
+            catch (Exception ex)
+            {
+                return response.SetErrorResponse("Error", $"An error occurred while processing payment: {ex.Message}");
+            }
         }
 
         public async Task<string> CreatePaymentIntent(decimal amount, string currency, string description, CancellationToken cancellationToken = default)

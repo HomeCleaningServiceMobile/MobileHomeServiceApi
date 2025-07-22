@@ -36,9 +36,10 @@ public class BookingsController : ControllerBase
             return BadRequest("Invalid user ID");
         }
 
-        // Pass user ID directly to service (service will handle customer creation if needed)
-        var result = await _bookingService.CreateBookingAsync(userId, request, cancellationToken);
-        return result.IsSucceeded ? CreatedAtAction(nameof(GetBookingById), new { id = result.Data?.Id }, result) : BadRequest(result);
+        var customerId = userId; // This should be mapped to actual customer ID
+
+        var result = await _bookingService.CreateBookingAsync(customerId, request, cancellationToken);
+        return result.IsSucceeded ? Ok(result.Data.Id) : BadRequest(result);
     }
 
     /// <summary>
