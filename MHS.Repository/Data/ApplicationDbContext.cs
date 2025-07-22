@@ -27,7 +27,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<CustomerPaymentMethod> CustomerPaymentMethods { get; set; }
     public DbSet<BookingImage> BookingImages { get; set; }
     public DbSet<StaffReport> StaffReports { get; set; }
-
+    
+    public DbSet<BusinessHours> BusinessHours { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -236,28 +237,6 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                 .HasForeignKey(bi => bi.BookingId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-
-        // WorkSchedule configurations
-        modelBuilder.Entity<WorkSchedule>(entity =>
-        {
-            entity.Property(p => p.Status)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => (WorkScheduleStatus)System.Enum.Parse(typeof(WorkScheduleStatus), v)
-                )
-                .HasDefaultValue(WorkScheduleStatus.Available);
-            
-            entity.HasOne(ws => ws.Staff)
-                .WithMany()
-                .HasForeignKey(ws => ws.StaffId)
-                .OnDelete(DeleteBehavior.Cascade);
-                
-            entity.HasOne(ws => ws.Booking)
-                .WithMany()
-                .HasForeignKey(ws => ws.BookingId)
-                .OnDelete(DeleteBehavior.Restrict);
-        });
-
         // Notification configurations
         modelBuilder.Entity<Notification>(entity =>
         {
@@ -272,6 +251,21 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
                 .WithMany(u => u.Notifications)
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // WorkSchedule configurations
+        modelBuilder.Entity<WorkSchedule>(entity =>
+        {
+            entity.HasOne(ws => ws.Staff)
+                .WithMany(s => s.WorkSchedules)
+                .HasForeignKey(ws => ws.StaffId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // BusinessHours configurations
+        modelBuilder.Entity<BusinessHours>(entity =>
+        {
+            entity.HasIndex(e => e.DayOfWeek).IsUnique();
         });
 
         // Configure soft delete filter (User filter already set above)
@@ -290,6 +284,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         modelBuilder.Entity<CustomerPaymentMethod>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<BookingImage>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<StaffReport>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<BusinessHours>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -62,6 +62,37 @@ public class Staff : BaseEntity
 
     [MaxLength(20)]
     public string? PostalCode { get; set; }
+    [NotMapped]
+    public WorkSchedule TodaysSchedule
+    {
+        get
+        {
+            var today = (int)DateTime.Now.DayOfWeek;
+            return WorkSchedules?.FirstOrDefault(ws => ws.DayOfWeek == today && ws.IsActive);
+        }
+    }
+
+    [NotMapped]
+    public bool IsCurrentlyWorking
+    {
+        get
+        {
+            var todaySchedule = TodaysSchedule;
+            return todaySchedule?.IsWorkingNow ?? false;
+        }
+    }
+
+    public WorkSchedule GetScheduleForDay(DayOfWeek day)
+    {
+        return WorkSchedules?.FirstOrDefault(ws => ws.DayOfWeek == (int)day && ws.IsActive);
+    }
+
+    public bool IsAvailableForBooking(DateTime bookingDateTime)
+    {
+
+        var schedule = GetScheduleForDay(bookingDateTime.DayOfWeek);
+        return schedule?.IsAvailableAt(bookingDateTime) ?? false;
+    }
     // Navigation properties
     [ForeignKey(nameof(UserId))]
     public virtual ApplicationUser User { get; set; } = null!;

@@ -25,18 +25,18 @@ public class BookingService : IBookingService
         _logger = logger;
     }
 
-    public async Task<AppResponse<BookingResponse>> CreateBookingAsync(int customerId, CreateBookingRequest request, CancellationToken cancellationToken = default)
+    public async Task<AppResponse<BookingResponse>> CreateBookingAsync(int customerUserId, CreateBookingRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
-            _logger.LogInformation("Creating booking for customer {CustomerId}", customerId);
+            _logger.LogInformation("Creating booking for customer UserId {CustomerUserId}", customerUserId);
 
-            // Validate customer exists
-            var customer = await _unitOfWork.Repository<Customer>().GetEntityByIdAsync(customerId);
+            // Get existing customer record
+            var customer = await _unitOfWork.Repository<Customer>().GetFirstOrDefaultAsync(c => c.UserId == customerUserId);
             if (customer == null)
             {
                 return new AppResponse<BookingResponse>()
-                    .SetErrorResponse("Customer", "Customer not found");
+                    .SetErrorResponse("Customer", "Customer record not found for this user");
             }
 
             // Validate service exists
@@ -59,52 +59,81 @@ public class BookingService : IBookingService
                 }
             }
 
+            // Validate staff if provided
+            int? staffId = null;
+            if (request.UserId.HasValue)
+            {
+                staffId = await GetStaffIdByUserIdAsync(request.UserId.Value, cancellationToken);
+                if (!staffId.HasValue)
+                {
+                    return new AppResponse<BookingResponse>()
+                        .SetErrorResponse("Staff", "Staff not found");
+                }
+                
+                var staff = await _unitOfWork.Repository<Staff>().GetEntityByIdAsync(staffId.Value);
+                if (staff == null || !staff.IsAvailable)
+                {
+                    return new AppResponse<BookingResponse>()
+                        .SetErrorResponse("Staff", "Staff not found or not available");
+                }
+            }
+
             // Calculate total amount
             var totalAmount = CalculateBookingAmount(service, servicePackage);
 
             // Generate booking number
             var bookingNumber = await GenerateBookingNumberAsync();
 
-            // Create booking entity
-            var booking = new Booking
-            {
-                CustomerId = customerId,
-                ServiceId = request.ServiceId,
-                ServicePackageId = request.ServicePackageId,
-                BookingNumber = bookingNumber,
-                Status = BookingStatus.Pending,
-                ScheduledDate = request.ScheduledDate,
-                ScheduledTime = request.ScheduledTime,
-                EstimatedDurationMinutes = servicePackage?.DurationMinutes ?? service.EstimatedDurationMinutes,
-                TotalAmount = totalAmount,
-                ServiceAddress = request.ServiceAddress,
-                AddressLatitude = request.AddressLatitude,
-                AddressLongitude = request.AddressLongitude,
-                SpecialInstructions = request.SpecialInstructions,
-                CreatedAt = DateTime.UtcNow
-            };
+                    // Create booking entity
+        var booking = new Booking
+        {
+            CustomerId = customer.Id, // Use actual CustomerId from Customer table
+            ServiceId = request.ServiceId,
+            ServicePackageId = request.ServicePackageId,
+            StaffId = staffId,
+            BookingNumber = bookingNumber,
+            Status = staffId.HasValue ? BookingStatus.Confirmed : BookingStatus.Pending,
+            ScheduledDate = request.ScheduledDate,
+            ScheduledTime = request.ScheduledTime,
+            EstimatedDurationMinutes = servicePackage?.DurationMinutes ?? service.EstimatedDurationMinutes,
+            TotalAmount = totalAmount,
+            ServiceAddress = request.ServiceAddress,
+            AddressLatitude = request.AddressLatitude,
+            AddressLongitude = request.AddressLongitude,
+            SpecialInstructions = request.SpecialInstructions,
+            CreatedAt = DateTime.UtcNow
+        };
 
             await _unitOfWork.Repository<Booking>().AddAsync(booking);
             await _unitOfWork.CompleteAsync(cancellationToken);
 
-            // Auto-assign staff
-            await AutoAssignStaffAsync(booking.Id, cancellationToken);
+            // Auto-assign staff only if not provided
+            if (!staffId.HasValue)
+            {
+                await AutoAssignStaffAsync(booking.Id, cancellationToken);
+            }
 
             // Reload booking with related entities
             var createdBooking = await GetBookingWithRelatedEntitiesAsync(booking.Id);
             var response = _mapper.Map<BookingResponse>(createdBooking);
+            
+            if (createdBooking.Status == BookingStatus.Completed)
+            {
+                response.AddressLatitude = 0;
+                response.AddressLongitude = 0;
+            }
 
             _logger.LogInformation("Booking created successfully with ID {BookingId}", booking.Id);
 
             return new AppResponse<BookingResponse>()
                 .SetSuccessResponse(response, "Success", "Booking created successfully");
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating booking for customer {CustomerId}", customerId);
-            return new AppResponse<BookingResponse>()
-                .SetErrorResponse("Error", "An error occurred while creating the booking");
-        }
+            catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error creating booking for customer UserId {CustomerUserId}", customerUserId);
+        return new AppResponse<BookingResponse>()
+            .SetErrorResponse("Error", "An error occurred while creating the booking");
+    }
     }
 
     public async Task<AppResponse<BookingResponse>> GetBookingByIdAsync(int id, CancellationToken cancellationToken = default)
@@ -119,6 +148,13 @@ public class BookingService : IBookingService
             }
 
             var response = _mapper.Map<BookingResponse>(booking);
+            // Ẩn vị trí nếu booking đã hoàn thành
+            if (booking.Status == BookingStatus.Completed)
+            {
+                response.AddressLatitude = 0;
+                response.AddressLongitude = 0;
+            }
+
             return new AppResponse<BookingResponse>()
                 .SetSuccessResponse(response);
         }
@@ -169,6 +205,15 @@ public class BookingService : IBookingService
             );
 
             var items = _mapper.Map<List<BookingSummaryResponse>>(bookings.Items);
+            // Ẩn vị trí nếu booking đã hoàn thành
+            foreach (var item in items)
+            {
+                if (item.Status == BookingStatus.Completed)
+                {
+                    item.AddressLatitude = 0;
+                    item.AddressLongitude = 0;
+                }
+            }
 
             return new AppResponse<List<BookingSummaryResponse>>()
                 .SetSuccessResponse(items)
@@ -226,6 +271,12 @@ public class BookingService : IBookingService
 
             var updatedBooking = await GetBookingWithRelatedEntitiesAsync(id);
             var response = _mapper.Map<BookingResponse>(updatedBooking);
+            // Ẩn vị trí nếu booking đã hoàn thành
+            if (updatedBooking.Status == BookingStatus.Completed)
+            {
+                response.AddressLatitude = 0;
+                response.AddressLongitude = 0;
+            }
 
             return new AppResponse<BookingResponse>()
                 .SetSuccessResponse(response, "Success", "Booking updated successfully");
@@ -275,10 +326,20 @@ public class BookingService : IBookingService
         }
     }
 
-    public async Task<AppResponse<string>> RespondToBookingAsync(int staffId, StaffResponseRequest request, CancellationToken cancellationToken = default)
+    public async Task<AppResponse<string>> RespondToBookingAsync(int userId, StaffResponseRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
+            _logger.LogInformation("Staff with UserId {UserId} responding to booking {BookingId}", userId, request.BookingId);
+
+            // Get StaffId from UserId
+            var staffId = await GetStaffIdByUserIdAsync(userId, cancellationToken);
+            if (!staffId.HasValue)
+            {
+                return new AppResponse<string>()
+                    .SetErrorResponse("Staff", "Staff not found");
+            }
+
             var booking = await _unitOfWork.Repository<Booking>().GetEntityByIdAsync(request.BookingId);
             if (booking == null)
             {
@@ -286,7 +347,7 @@ public class BookingService : IBookingService
                     .SetErrorResponse("Booking", "Booking not found");
             }
 
-            if (booking.StaffId != staffId)
+            if (booking.StaffId != staffId.Value)
             {
                 return new AppResponse<string>()
                     .SetErrorResponse("Authorization", "You are not assigned to this booking");
@@ -328,10 +389,20 @@ public class BookingService : IBookingService
         }
     }
 
-    public async Task<AppResponse<string>> CheckInAsync(int staffId, CheckInRequest request, CancellationToken cancellationToken = default)
+    public async Task<AppResponse<string>> CheckInAsync(int userId, CheckInRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
+            _logger.LogInformation("Staff with UserId {UserId} checking in to booking {BookingId}", userId, request.BookingId);
+
+            // Get StaffId from UserId
+            var staffId = await GetStaffIdByUserIdAsync(userId, cancellationToken);
+            if (!staffId.HasValue)
+            {
+                return new AppResponse<string>()
+                    .SetErrorResponse("Staff", "Staff not found");
+            }
+
             var booking = await _unitOfWork.Repository<Booking>().GetEntityByIdAsync(request.BookingId);
             if (booking == null)
             {
@@ -339,7 +410,7 @@ public class BookingService : IBookingService
                     .SetErrorResponse("Booking", "Booking not found");
             }
 
-            if (booking.StaffId != staffId)
+            if (booking.StaffId != staffId.Value)
             {
                 return new AppResponse<string>()
                     .SetErrorResponse("Authorization", "You are not assigned to this booking");
@@ -372,10 +443,20 @@ public class BookingService : IBookingService
         }
     }
 
-    public async Task<AppResponse<string>> CheckOutAsync(int staffId, CheckOutRequest request, CancellationToken cancellationToken = default)
+    public async Task<AppResponse<string>> CheckOutAsync(int userId, CheckOutRequest request, CancellationToken cancellationToken = default)
     {
         try
         {
+            _logger.LogInformation("Staff with UserId {UserId} checking out from booking {BookingId}", userId, request.BookingId);
+
+            // Get StaffId from UserId
+            var staffId = await GetStaffIdByUserIdAsync(userId, cancellationToken);
+            if (!staffId.HasValue)
+            {
+                return new AppResponse<string>()
+                    .SetErrorResponse("Staff", "Staff not found");
+            }
+
             var booking = await _unitOfWork.Repository<Booking>().GetEntityByIdAsync(request.BookingId);
             if (booking == null)
             {
@@ -383,7 +464,7 @@ public class BookingService : IBookingService
                     .SetErrorResponse("Booking", "Booking not found");
             }
 
-            if (booking.StaffId != staffId)
+            if (booking.StaffId != staffId.Value)
             {
                 return new AppResponse<string>()
                     .SetErrorResponse("Authorization", "You are not assigned to this booking");
@@ -490,41 +571,59 @@ public class BookingService : IBookingService
                 includeProperties: q => q.Include(ss => ss.Staff).ThenInclude(s => s.User)
             );
 
-            var availableStaff = new List<Staff>();
+            if (staffWithSkills == null || !staffWithSkills.Any())
+            {
+                return new AppResponse<List<StaffResponse>>()
+                    .SetErrorResponse("Staff", "No staff found with the required skills for this service");
+            }
+
+            var availableStaff = new List<(Staff Staff, double Score)>();
+
 
             foreach (var staffSkill in staffWithSkills)
             {
                 var staff = staffSkill.Staff;
-                
-                // Check if staff is available (not banned, active, etc.)
+
                 if (staff.User.Status != UserStatus.Active || !staff.IsAvailable)
                     continue;
 
-                // Check if staff is within service radius (simplified distance check)
+                double distance = double.MaxValue;
                 if (staff.CurrentLatitude.HasValue && staff.CurrentLongitude.HasValue)
                 {
-                    var distance = CalculateDistance(
+                    distance = CalculateDistance(
                         (double)latitude, (double)longitude,
                         (double)staff.CurrentLatitude.Value, (double)staff.CurrentLongitude.Value);
-                    
+
                     if (distance > staff.ServiceRadiusKm)
                         continue;
                 }
 
-                // Check if staff has no conflicting bookings
                 var hasConflict = await _unitOfWork.Repository<Booking>().ExistsAsync(b =>
                     b.StaffId == staff.Id &&
                     b.ScheduledDate == scheduledDate &&
                     b.Status != BookingStatus.Cancelled &&
                     b.Status != BookingStatus.Completed);
 
-                if (!hasConflict)
-                {
-                    availableStaff.Add(staff);
-                }
+                if (hasConflict)
+                    continue;
+
+                //Cal Score
+                double score = 0;
+                score += (distance > 0 ? (1 / distance) * 30 : 30); 
+                score += (double) staff.AverageRating * 30;                         
+                score += staff.TotalCompletedJobs * 0.5;         
+                //score += staff.ResponseRate * 10;               
+
+                availableStaff.Add((staff, score));
             }
 
-            var response = _mapper.Map<List<StaffResponse>>(availableStaff);
+            //Sort by best match first
+            var sortedStaff = availableStaff
+                .OrderByDescending(s => s.Score)
+                .Select(s => s.Staff)
+                .ToList();
+
+            var response = _mapper.Map<List<StaffResponse>>(sortedStaff);
             return new AppResponse<List<StaffResponse>>()
                 .SetSuccessResponse(response);
         }
@@ -585,7 +684,9 @@ public class BookingService : IBookingService
 
     public async Task<AppResponse<List<BookingSummaryResponse>>> GetAllBookingsAsync(BookingListRequest request, CancellationToken cancellationToken = default)
     {
-        return await GetBookingsAsync(request, cancellationToken);
+        var result = await GetBookingsAsync(request, cancellationToken);
+        // Đã xử lý ẩn vị trí trong GetBookingsAsync nên không cần lặp lại ở đây
+        return result;
     }
 
     public async Task<AppResponse<string>> ForceCompleteBookingAsync(int id, string reason, CancellationToken cancellationToken = default)
@@ -701,11 +802,21 @@ public class BookingService : IBookingService
         }
     }
 
-    public async Task<AppResponse<List<BookingSummaryResponse>>> GetStaffBookingsAsync(int staffId, BookingListRequest request, CancellationToken cancellationToken = default)
+    public async Task<AppResponse<List<BookingSummaryResponse>>> GetStaffBookingsAsync(int userId, BookingListRequest request, CancellationToken cancellationToken = default)
     {
+        // Get StaffId from UserId
+        var staffId = await GetStaffIdByUserIdAsync(userId, cancellationToken);
+        if (!staffId.HasValue)
+        {
+            return new AppResponse<List<BookingSummaryResponse>>()
+                .SetErrorResponse("Staff", "Staff not found");
+        }
+
         // Set the staff ID filter
-        request.StaffId = staffId;
-        return await GetBookingsAsync(request, cancellationToken);
+        request.StaffId = staffId.Value;
+        var result = await GetBookingsAsync(request, cancellationToken);
+        // Đã xử lý ẩn vị trí trong GetBookingsAsync nên không cần lặp lại ở đây
+        return result;
     }
 
     // Helper methods
@@ -744,6 +855,13 @@ public class BookingService : IBookingService
                 Math.Sin(dLon / 2) * Math.Sin(dLon / 2);
         var c = 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
         return R * c;
+    }
+
+    // Helper method to get StaffId from UserId
+    private async Task<int?> GetStaffIdByUserIdAsync(int userId, CancellationToken cancellationToken = default)
+    {
+        var staff = await _unitOfWork.Repository<Staff>().GetFirstOrDefaultAsync(s => s.UserId == userId);
+        return staff?.Id;
     }
 }
 

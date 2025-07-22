@@ -122,7 +122,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <returns>User profile information</returns>
     [HttpGet("profile")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> GetProfile()
     {
         try
@@ -282,7 +282,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <returns>Success result</returns>
     [HttpPost("logout")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> Logout()
     {
         try
@@ -305,4 +305,18 @@ public class AuthController : ControllerBase
                 .SetErrorResponse("Error", "An error occurred during logout"));
         }
     }
-} 
+
+    /// <summary>
+    /// Google login (auto-register if not exists)
+    /// </summary>
+    [HttpPost("google-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+    {
+        var result = await _userService.GoogleLoginAsync(request);
+        if (!result.IsSucceeded)
+            return BadRequest(result);
+
+        return Ok(result);
+    }
+}

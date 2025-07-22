@@ -1,5 +1,7 @@
+using System.ComponentModel.DataAnnotations;
 using MHS.Common.DTOs;
 using MHS.Common.Enums;
+using MHS.Service.DTOs;
 
 namespace MHS.Service.DTOs;
 
@@ -23,7 +25,7 @@ public class StaffResponse
     public decimal? CurrentLatitude { get; set; }
     public decimal? CurrentLongitude { get; set; }
     public DateTime CreatedAt { get; set; }
-    
+
     public UserResponse User { get; set; } = null!;
     public List<StaffSkillResponse> StaffSkills { get; set; } = new();
 }
@@ -38,8 +40,53 @@ public class StaffSkillResponse
     public DateTime? CertifiedAt { get; set; }
     public string? CertificationUrl { get; set; }
     public string? Notes { get; set; }
-    
+
     public ServiceResponse Service { get; set; } = null!;
+}
+
+/// CRUD Profile Staff
+public class GetStaffProfileResponse
+{
+    public string FirstName { get; set; } = string.Empty;
+    public string LastName { get; set; } = string.Empty;
+    public string? ProfileImageUrl { get; set; }
+    public DateTime? DateOfBirth { get; set; }
+    public string? Gender { get; set; }
+    public string? EmergencyContactName { get; set; }
+    public string? EmergencyContactPhone { get; set; }
+    public string? Skills { get; set; }
+    public string? Bio { get; set; }
+}
+
+public class UpdateStaffProfileRequest
+{
+    [Required]
+    [MaxLength(100)]
+    public string FirstName { get; set; } = string.Empty;
+
+    [Required]
+    [MaxLength(100)]
+    public string LastName { get; set; } = string.Empty;
+
+    [MaxLength(255)]
+    public string? ProfileImageUrl { get; set; }
+
+    public DateTime? DateOfBirth { get; set; }
+
+    [MaxLength(20)]
+    public string? Gender { get; set; }
+
+    [MaxLength(100)]
+    public string? EmergencyContactName { get; set; }
+
+    [MaxLength(20)]
+    public string? EmergencyContactPhone { get; set; }
+
+    [MaxLength(500)]
+    public string? Skills { get; set; }
+
+    [MaxLength(1000)]
+    public string? Bio { get; set; }
 }
 
 // Admin Staff Management DTOs
