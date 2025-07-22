@@ -282,7 +282,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <returns>Success result</returns>
     [HttpPost("logout")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> Logout()
     {
         try
