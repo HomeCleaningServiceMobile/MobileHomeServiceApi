@@ -31,21 +31,22 @@ public class AdminStaffService : IAdminStaffService
         _logger = logger;
     }
 
-    public async Task<AppResponse<PaginatedResponse<AdminStaffListResponse>>> GetAllStaffAsync(AdminStaffSearchRequest request)
+    public async Task<AppResponse<PaginatedResponse<AdminStaffListResponse>>> GetAllStaffAsync(
+        AdminStaffSearchRequest request)
     {
         try
         {
             // Build filter expression
             Expression<Func<Staff, bool>>? filter = null;
-            if (!string.IsNullOrEmpty(request.SearchTerm) || !string.IsNullOrEmpty(request.EmployeeId) || 
+            if (!string.IsNullOrEmpty(request.SearchTerm) || !string.IsNullOrEmpty(request.EmployeeId) ||
                 request.IsAvailable.HasValue || request.Status.HasValue ||
                 request.HireDateFrom.HasValue || request.HireDateTo.HasValue ||
                 request.MinRating.HasValue || request.MaxRating.HasValue ||
                 !string.IsNullOrEmpty(request.Skills))
             {
-                filter = s => 
-                    !s.IsDeleted && 
-                    (string.IsNullOrEmpty(request.SearchTerm) || 
+                filter = s =>
+                    !s.IsDeleted &&
+                    (string.IsNullOrEmpty(request.SearchTerm) ||
                      s.User.FirstName.Contains(request.SearchTerm) ||
                      s.User.LastName.Contains(request.SearchTerm) ||
                      s.User.Email.Contains(request.SearchTerm) ||
@@ -69,33 +70,33 @@ public class AdminStaffService : IAdminStaffService
             // Build order expression
             Func<IQueryable<Staff>, IOrderedQueryable<Staff>>? orderBy = request.SortBy?.ToLower() switch
             {
-                "firstname" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.User.FirstName) : 
-                    q => q.OrderBy(s => s.User.FirstName),
-                "lastname" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.User.LastName) : 
-                    q => q.OrderBy(s => s.User.LastName),
-                "email" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.User.Email) : 
-                    q => q.OrderBy(s => s.User.Email),
-                "employeeid" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.EmployeeId) : 
-                    q => q.OrderBy(s => s.EmployeeId),
-                "hiredate" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.HireDate) : 
-                    q => q.OrderBy(s => s.HireDate),
-                "rating" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.AverageRating) : 
-                    q => q.OrderBy(s => s.AverageRating),
-                "completedjobs" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.TotalCompletedJobs) : 
-                    q => q.OrderBy(s => s.TotalCompletedJobs),
-                "status" => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.User.Status) : 
-                    q => q.OrderBy(s => s.User.Status),
-                _ => request.SortDescending ? 
-                    q => q.OrderByDescending(s => s.CreatedAt) : 
-                    q => q.OrderBy(s => s.CreatedAt)
+                "firstname" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.User.FirstName)
+                    : q => q.OrderBy(s => s.User.FirstName),
+                "lastname" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.User.LastName)
+                    : q => q.OrderBy(s => s.User.LastName),
+                "email" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.User.Email)
+                    : q => q.OrderBy(s => s.User.Email),
+                "employeeid" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.EmployeeId)
+                    : q => q.OrderBy(s => s.EmployeeId),
+                "hiredate" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.HireDate)
+                    : q => q.OrderBy(s => s.HireDate),
+                "rating" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.AverageRating)
+                    : q => q.OrderBy(s => s.AverageRating),
+                "completedjobs" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.TotalCompletedJobs)
+                    : q => q.OrderBy(s => s.TotalCompletedJobs),
+                "status" => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.User.Status)
+                    : q => q.OrderBy(s => s.User.Status),
+                _ => request.SortDescending
+                    ? q => q.OrderByDescending(s => s.CreatedAt)
+                    : q => q.OrderBy(s => s.CreatedAt)
             };
 
             var staffList = await _unitOfWork.Repository<Staff>().ListAsyncWithPaginated(
@@ -139,7 +140,8 @@ public class AdminStaffService : IAdminStaffService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting staff list");
-            return new AppResponse<PaginatedResponse<AdminStaffListResponse>>().SetErrorResponse("Error", "Failed to retrieve staff list");
+            return new AppResponse<PaginatedResponse<AdminStaffListResponse>>().SetErrorResponse("Error",
+                "Failed to retrieve staff list");
         }
     }
 
@@ -151,11 +153,11 @@ public class AdminStaffService : IAdminStaffService
                 s => s.Id == staffId && !s.IsDeleted,
                 null,
                 q => q.Include(s => s.User)
-                      .Include(s => s.StaffSkills)
-                      .ThenInclude(ss => ss.Service)
-                      .Include(s => s.Bookings.Take(10))
-                      .ThenInclude(b => b.Customer)
-                      .ThenInclude(c => c.User));
+                    .Include(s => s.StaffSkills)
+                    .ThenInclude(ss => ss.Service)
+                    .Include(s => s.Bookings.Take(10))
+                    .ThenInclude(b => b.Customer)
+                    .ThenInclude(c => c.User));
 
             var staffEntity = staff.FirstOrDefault();
             if (staffEntity == null)
@@ -215,7 +217,6 @@ public class AdminStaffService : IAdminStaffService
     {
         try
         {
-            // Check if email already exists
             var existingUser = await _userManager.FindByEmailAsync(request.Email);
             if (existingUser != null)
             {
@@ -223,7 +224,6 @@ public class AdminStaffService : IAdminStaffService
                     .SetErrorResponse("Email", "Email already exists");
             }
 
-            // Check if employee ID already exists
             var existingStaffList = await _unitOfWork.Repository<Staff>()
                 .ListAsync(s => s.EmployeeId == request.EmployeeId && !s.IsDeleted);
 
@@ -233,10 +233,8 @@ public class AdminStaffService : IAdminStaffService
                     .SetErrorResponse("EmployeeId", "Employee ID already exists");
             }
 
-            // Start transaction
             return await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-                // Create user
                 var user = new ApplicationUser
                 {
                     FirstName = request.FirstName,
@@ -246,16 +244,16 @@ public class AdminStaffService : IAdminStaffService
                     PhoneNumber = request.PhoneNumber,
                     Role = UserRole.Staff,
                     Status = UserStatus.Active,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
                 };
 
                 var createUserResult = await _userManager.CreateAsync(user, request.Password);
                 if (!createUserResult.Succeeded)
                 {
-                    throw new InvalidOperationException($"Failed to create user: {string.Join(", ", createUserResult.Errors.Select(e => e.Description))}");
+                    throw new InvalidOperationException(
+                        $"Failed to create user: {string.Join(", ", createUserResult.Errors.Select(e => e.Description))}");
                 }
 
-                // Create staff profile
                 var staff = new Staff
                 {
                     UserId = user.Id,
@@ -274,20 +272,51 @@ public class AdminStaffService : IAdminStaffService
                     CertificationImageUrl = request.CertificationImageUrl,
                     IdCardImageUrl = request.IdCardImageUrl,
                     IsAvailable = true,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    IsDeleted = false,
                 };
 
                 await _unitOfWork.Repository<Staff>().AddAsync(staff);
                 await _unitOfWork.CompleteAsync();
 
-                // Return the created staff details
-                var staffDetailResult = await GetStaffByIdAsync(staff.Id);
-                if (!staffDetailResult.IsSucceeded)
+                var response = new AdminStaffDetailResponse
                 {
-                    throw new InvalidOperationException("Failed to retrieve created staff details");
-                }
+                    Id = staff.Id,
+                    UserId = staff.UserId,
+                    EmployeeId = staff.EmployeeId,
+                    FullName = $"{user.FirstName ?? ""} {user.LastName ?? ""}".Trim(),
+                    Email = user.Email ?? "",
+                    PhoneNumber = user.PhoneNumber,
+                    HireDate = staff.HireDate,
+                    Skills = staff.Skills,
+                    Bio = staff.Bio,
+                    HourlyRate = staff.HourlyRate,
+                    AverageRating = staff.AverageRating,
+                    TotalCompletedJobs = staff.TotalCompletedJobs,
+                    IsAvailable = staff.IsAvailable,
+                    Status = user.Status,
+                    IsDeleted = staff.IsDeleted,
+                    LastActiveAt = staff.LastActiveAt,
+                    ServiceRadiusKm = staff.ServiceRadiusKm,
+                    CurrentLatitude = staff.CurrentLatitude,
+                    CurrentLongitude = staff.CurrentLongitude,
+                    FullAddress = staff.FullAddress,
+                    Street = staff.Street,
+                    District = staff.District,
+                    City = staff.City,
+                    Province = staff.Province,
+                    PostalCode = staff.PostalCode,
+                    CertificationImageUrl = staff.CertificationImageUrl,
+                    IdCardImageUrl = staff.IdCardImageUrl,
+                    CreatedAt = staff.CreatedAt,
+                    UpdatedAt = staff.UpdatedAt,
+                    User = _mapper.Map<UserResponse>(user),
+                    StaffSkills = new List<StaffSkillResponse>(),
+                    RecentBookings = new List<BookingResponse>()
+                };
 
-                return staffDetailResult;
+                return new AppResponse<AdminStaffDetailResponse>()
+                    .SetSuccessResponse(response);
             });
         }
         catch (InvalidOperationException ex)
@@ -297,12 +326,13 @@ public class AdminStaffService : IAdminStaffService
         }
     }
 
-    public async Task<AppResponse<AdminStaffDetailResponse>> UpdateStaffAsync(int staffId, AdminUpdateStaffRequest request)
+    public async Task<AppResponse<AdminStaffDetailResponse>> UpdateStaffAsync(int staffId,
+        AdminUpdateStaffRequest request)
     {
         try
         {
             var staffList = await _unitOfWork.Repository<Staff>()
-                .ListAsync(s => s.Id == staffId && !s.IsDeleted, null, 
+                .ListAsync(s => s.Id == staffId && !s.IsDeleted, null,
                     q => q.Include(s => s.User));
 
             var staff = staffList.FirstOrDefault();
@@ -315,13 +345,13 @@ public class AdminStaffService : IAdminStaffService
             // Update user information
             if (!string.IsNullOrEmpty(request.FirstName))
                 staff.User.FirstName = request.FirstName;
-            
+
             if (!string.IsNullOrEmpty(request.LastName))
                 staff.User.LastName = request.LastName;
-            
+
             if (!string.IsNullOrEmpty(request.Email))
                 staff.User.Email = staff.User.UserName = request.Email;
-            
+
             if (!string.IsNullOrEmpty(request.PhoneNumber))
                 staff.User.PhoneNumber = request.PhoneNumber;
 
@@ -337,49 +367,49 @@ public class AdminStaffService : IAdminStaffService
                     return new AppResponse<AdminStaffDetailResponse>()
                         .SetErrorResponse("EmployeeId", "Employee ID already exists");
                 }
-                
+
                 staff.EmployeeId = request.EmployeeId;
             }
 
             if (request.HireDate.HasValue)
                 staff.HireDate = request.HireDate.Value;
-            
+
             if (request.Skills != null)
                 staff.Skills = request.Skills;
-            
+
             if (request.Bio != null)
                 staff.Bio = request.Bio;
-            
+
             if (request.HourlyRate.HasValue)
                 staff.HourlyRate = request.HourlyRate.Value;
-            
+
             if (request.IsAvailable.HasValue)
                 staff.IsAvailable = request.IsAvailable.Value;
-            
+
             if (request.ServiceRadiusKm.HasValue)
                 staff.ServiceRadiusKm = request.ServiceRadiusKm.Value;
-            
+
             if (request.FullAddress != null)
                 staff.FullAddress = request.FullAddress;
-            
+
             if (request.Street != null)
                 staff.Street = request.Street;
-            
+
             if (request.District != null)
                 staff.District = request.District;
-            
+
             if (request.City != null)
                 staff.City = request.City;
-            
+
             if (request.Province != null)
                 staff.Province = request.Province;
-            
+
             if (request.PostalCode != null)
                 staff.PostalCode = request.PostalCode;
-            
+
             if (request.CertificationImageUrl != null)
                 staff.CertificationImageUrl = request.CertificationImageUrl;
-            
+
             if (request.IdCardImageUrl != null)
                 staff.IdCardImageUrl = request.IdCardImageUrl;
 
@@ -411,7 +441,7 @@ public class AdminStaffService : IAdminStaffService
         try
         {
             var staffList = await _unitOfWork.Repository<Staff>().ListAsync(s => s.Id == staffId && !s.IsDeleted, null,
-                    q => q.Include(s => s.User));
+                q => q.Include(s => s.User));
 
             var staff = staffList.FirstOrDefault();
             if (staff == null)
@@ -466,9 +496,9 @@ public class AdminStaffService : IAdminStaffService
             }
 
             // Check if staff has active bookings
-            var hasActiveBookings = staff.Bookings.Any(b => 
-                b.Status == BookingStatus.Pending || 
-                b.Status == BookingStatus.Confirmed || 
+            var hasActiveBookings = staff.Bookings.Any(b =>
+                b.Status == BookingStatus.Pending ||
+                b.Status == BookingStatus.Confirmed ||
                 b.Status == BookingStatus.InProgress);
 
             if (hasActiveBookings)
@@ -499,7 +529,8 @@ public class AdminStaffService : IAdminStaffService
         }
     }
 
-    public async Task<AppResponse<StaffSkillResponse>> AddStaffSkillAsync(int staffId, StaffSkillManagementRequest request)
+    public async Task<AppResponse<StaffSkillResponse>> AddStaffSkillAsync(int staffId,
+        StaffSkillManagementRequest request)
     {
         try
         {
@@ -552,7 +583,8 @@ public class AdminStaffService : IAdminStaffService
         }
     }
 
-    public async Task<AppResponse<StaffSkillResponse>> UpdateStaffSkillAsync(int staffId, int skillId, StaffSkillManagementRequest request)
+    public async Task<AppResponse<StaffSkillResponse>> UpdateStaffSkillAsync(int staffId, int skillId,
+        StaffSkillManagementRequest request)
     {
         try
         {
@@ -675,10 +707,12 @@ public class AdminStaffService : IAdminStaffService
             var activeStaff = allStaff.Count(s => !s.IsDeleted);
             var availableStaff = allStaff.Count(s => !s.IsDeleted && s.IsAvailable);
             var deletedStaff = allStaff.Count(s => s.IsDeleted);
-            
-            var activeNonDeletedStaff = allStaff.Where(s => !s.IsDeleted && s.User.Status == UserStatus.Active).ToList();
-            var averageRating = activeNonDeletedStaff.Any() ? 
-                activeNonDeletedStaff.Average(s => (double)s.AverageRating) : 0;
+
+            var activeNonDeletedStaff =
+                allStaff.Where(s => !s.IsDeleted && s.User.Status == UserStatus.Active).ToList();
+            var averageRating = activeNonDeletedStaff.Any()
+                ? activeNonDeletedStaff.Average(s => (double)s.AverageRating)
+                : 0;
 
             // Status breakdown
             var statusBreakdown = allStaff
@@ -712,10 +746,10 @@ public class AdminStaffService : IAdminStaffService
         try
         {
             var cutoffDate = DateTime.UtcNow.AddDays(-daysInactive);
-            
+
             var inactiveStaff = await _unitOfWork.Repository<Staff>()
                 .ListAsync(
-                    s => !s.IsDeleted && s.User.Status == UserStatus.Active && 
+                    s => !s.IsDeleted && s.User.Status == UserStatus.Active &&
                          (s.LastActiveAt == null || s.LastActiveAt < cutoffDate),
                     q => q.OrderBy(s => s.LastActiveAt),
                     q => q.Include(s => s.User));
