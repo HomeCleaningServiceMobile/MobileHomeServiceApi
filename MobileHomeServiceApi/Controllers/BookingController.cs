@@ -484,6 +484,30 @@ public class BookingController : ControllerBase
     }
 
     /// <summary>
+    /// Get staff bookings (Staff role only)
+    /// </summary>
+    /// <param name="request">Booking list request parameters</param>
+    /// <returns>Staff bookings with pagination</returns>
+    [HttpGet("staff")]
+    [Authorize(Roles = "Staff")]
+    public async Task<IActionResult> GetStaffBookings([FromQuery] BookingListRequest request)
+    {
+        try
+        {
+            // Get user ID from claims (Staff role)
+            var userId = GetCurrentUserId();
+
+            var result = await _bookingService.GetStaffBookingsAsync(userId, request);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving staff bookings for current user");
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
     /// Get staff bookings
     /// </summary>
     /// <param name="staffId">Staff ID</param>
@@ -531,7 +555,7 @@ public class BookingController : ControllerBase
             if (bookingResult.Data.Staff == null || bookingResult.Data.Staff.Id != staffId)
                 return Forbid("You are not assigned to this booking");
 
-            // L?y v? trí staff (gi? s? có trong bookingResult.Data.Staff)
+            // L?y v? trï¿½ staff (gi? s? cï¿½ trong bookingResult.Data.Staff)
             var staffLat = bookingResult.Data.Staff.CurrentLatitude;
             var staffLng = bookingResult.Data.Staff.CurrentLongitude;
             var customerLat = bookingResult.Data.AddressLatitude;
