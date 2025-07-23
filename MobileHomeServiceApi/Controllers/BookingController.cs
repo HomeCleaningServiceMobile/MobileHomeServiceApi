@@ -123,6 +123,73 @@ public class BookingController : ControllerBase
     }
 
     /// <summary>
+    /// Get customer's own bookings with enhanced filtering and sorting options
+    /// </summary>
+    /// <param name="request">Customer booking list request parameters</param>
+    /// <returns>Paginated list of customer bookings</returns>
+    [HttpGet("my-bookings")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetMyBookings([FromQuery] CustomerBookingListRequest request)
+    {
+        try
+        {
+            var customerId = GetCurrentUserId();
+            request.CustomerId = customerId;
+
+            var result = await _bookingService.GetCustomerBookingsAsync(request);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving customer bookings for user {UserId}", GetCurrentUserId());
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get customer booking history with statistics
+    /// </summary>
+    /// <returns>Customer booking history with summary statistics</returns>
+    [HttpGet("my-bookings/history")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetMyBookingHistory()
+    {
+        try
+        {
+            var customerId = GetCurrentUserId();
+            var result = await _bookingService.GetCustomerBookingHistoryAsync(customerId);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving booking history for customer {CustomerId}", GetCurrentUserId());
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
+    /// Get upcoming bookings for customer
+    /// </summary>
+    /// <param name="days">Number of days to look ahead (default: 30)</param>
+    /// <returns>List of upcoming bookings</returns>
+    [HttpGet("my-bookings/upcoming")]
+    [Authorize(Roles = "Customer")]
+    public async Task<IActionResult> GetMyUpcomingBookings([FromQuery] int days = 30)
+    {
+        try
+        {
+            var customerId = GetCurrentUserId();
+            var result = await _bookingService.GetCustomerUpcomingBookingsAsync(customerId, days);
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving upcoming bookings for customer {CustomerId}", GetCurrentUserId());
+            return StatusCode(500, "Internal server error");
+        }
+    }
+
+    /// <summary>
     /// Update booking details
     /// </summary>
     /// <param name="id">Booking ID</param>

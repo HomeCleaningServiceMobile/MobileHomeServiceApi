@@ -307,7 +307,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
         foreach (var entry in entries)
         {
             var entity = (BaseEntity)entry.Entity;
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
 
             if (entry.State == EntityState.Added)
             {

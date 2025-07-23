@@ -863,6 +863,282 @@ public class BookingService : IBookingService
         var staff = await _unitOfWork.Repository<Staff>().GetFirstOrDefaultAsync(s => s.UserId == userId);
         return staff?.Id;
     }
+
+    // Enhanced customer booking operations implementation
+    public async Task<AppResponse<List<BookingSummaryResponse>>> GetCustomerBookingsAsync(CustomerBookingListRequest request, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Getting customer bookings for CustomerId {CustomerId}", request.CustomerId);
+
+            // Get all bookings for the customer with includes
+            var userId = await _unitOfWork.Repository<Customer>().FindAsync(c => c.UserId == request.CustomerId);
+            int id = userId.Id;
+            var allBookings = await _unitOfWork.Repository<Booking>().ListAsync(
+                filter: b => b.CustomerId == id,
+                orderBy: null,
+                includeProperties: q => q.Include(b => b.Customer)
+                    .ThenInclude(c => c.User)
+                    .Include(b => b.Service)
+                    .Include(b => b.ServicePackage)
+                    .Include(b => b.Staff)
+                    .ThenInclude(s => s.User));
+
+            // Apply filters in memory
+            var filteredBookings = allBookings.AsQueryable();
+
+            if (request.Status.HasValue)
+            {
+                filteredBookings = filteredBookings.Where(b => b.Status == request.Status.Value);
+            }
+
+            if (request.StartDate.HasValue)
+            {
+                filteredBookings = filteredBookings.Where(b => b.ScheduledDate >= request.StartDate.Value);
+            }
+
+            if (request.EndDate.HasValue)
+            {
+                filteredBookings = filteredBookings.Where(b => b.ScheduledDate <= request.EndDate.Value);
+            }
+
+            if (request.ServiceId.HasValue)
+            {
+                filteredBookings = filteredBookings.Where(b => b.ServiceId == request.ServiceId.Value);
+            }
+
+            if (!string.IsNullOrEmpty(request.ServiceName))
+            {
+                filteredBookings = filteredBookings.Where(b => b.Service.Name.Contains(request.ServiceName));
+            }
+
+            if (!string.IsNullOrEmpty(request.SearchTerm))
+            {
+                filteredBookings = filteredBookings.Where(b => 
+                    b.BookingNumber.Contains(request.SearchTerm) ||
+                    b.Service.Name.Contains(request.SearchTerm) ||
+                    b.ServiceAddress.Contains(request.SearchTerm));
+            }
+
+            // Apply sorting
+            var sortedBookings = request.SortBy switch
+            {
+                BookingSortBy.ScheduledDate => request.SortDirection == SortDirection.Ascending 
+                    ? filteredBookings.OrderBy(b => b.ScheduledDate)
+                    : filteredBookings.OrderByDescending(b => b.ScheduledDate),
+                BookingSortBy.CreatedDate => request.SortDirection == SortDirection.Ascending
+                    ? filteredBookings.OrderBy(b => b.CreatedAt)
+                    : filteredBookings.OrderByDescending(b => b.CreatedAt),
+                BookingSortBy.BookingNumber => request.SortDirection == SortDirection.Ascending
+                    ? filteredBookings.OrderBy(b => b.BookingNumber)
+                    : filteredBookings.OrderByDescending(b => b.BookingNumber),
+                BookingSortBy.ServiceName => request.SortDirection == SortDirection.Ascending
+                    ? filteredBookings.OrderBy(b => b.Service.Name)
+                    : filteredBookings.OrderByDescending(b => b.Service.Name),
+                BookingSortBy.Status => request.SortDirection == SortDirection.Ascending
+                    ? filteredBookings.OrderBy(b => b.Status)
+                    : filteredBookings.OrderByDescending(b => b.Status),
+                BookingSortBy.TotalPrice => request.SortDirection == SortDirection.Ascending
+                    ? filteredBookings.OrderBy(b => b.TotalAmount)
+                    : filteredBookings.OrderByDescending(b => b.TotalAmount),
+                _ => filteredBookings.OrderByDescending(b => b.ScheduledDate)
+            };
+
+            // Get total count before pagination
+            var totalCount = sortedBookings.Count();
+
+            // Apply pagination
+            var pagedBookings = sortedBookings
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToList();
+
+            var bookingResponses = _mapper.Map<List<BookingSummaryResponse>>(pagedBookings);
+
+            // Add additional customer-specific fields
+            foreach (var booking in bookingResponses)
+            {
+                var originalBooking = pagedBookings.First(b => b.Id == booking.Id);
+                booking.CanCancel = CanBookingBeCancelled(originalBooking);
+                booking.CanReschedule = CanBookingBeRescheduled(originalBooking);
+            }
+
+            return new AppResponse<List<BookingSummaryResponse>>()
+                .SetSuccessResponse(bookingResponses, "Success", "Customer bookings retrieved successfully")
+                .SetPagination(request.PageNumber, request.PageSize, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting customer bookings for CustomerId {CustomerId}", request.CustomerId);
+            return new AppResponse<List<BookingSummaryResponse>>()
+                .SetErrorResponse("Error", $"Failed to get customer bookings: {ex.Message}");
+        }
+    }
+
+    public async Task<AppResponse<CustomerBookingHistoryResponse>> GetCustomerBookingHistoryAsync(int customerId, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Getting booking history for CustomerId {CustomerId}", customerId);
+            var userId = await _unitOfWork.Repository<Customer>().FindAsync(c => c.UserId == customerId);
+            int id = userId.Id;
+
+            var bookings = await _unitOfWork.Repository<Booking>().ListAsync(
+                filter: b => b.CustomerId == id,
+                orderBy: q => q.OrderByDescending(b => b.ScheduledDate),
+                includeProperties: q => q.Include(b => b.Service)
+                    .Include(b => b.Staff)
+                    .ThenInclude(s => s.User));
+
+            // Get recent bookings (last 10)
+            var recentBookings = bookings.Take(10).ToList();
+            var recentBookingResponses = _mapper.Map<List<BookingResponse>>(recentBookings);
+
+            // Calculate statistics
+            var now = DateTime.UtcNow;
+            var thisMonth = now.Month;
+            var thisYear = now.Year;
+
+            var statistics = new BookingStatistics
+            {
+                TotalBookings = bookings.Count,
+                CompletedBookings = bookings.Count(b => b.Status == BookingStatus.Completed),
+                CancelledBookings = bookings.Count(b => b.Status == BookingStatus.Cancelled),
+                PendingBookings = bookings.Count(b => b.Status == BookingStatus.Pending || b.Status == BookingStatus.Confirmed),
+                TotalSpent = bookings.Where(b => b.Status == BookingStatus.Completed).Sum(b => b.TotalAmount),
+                BookingsThisMonth = bookings.Count(b => b.ScheduledDate.Month == thisMonth && b.ScheduledDate.Year == thisYear),
+                BookingsThisYear = bookings.Count(b => b.ScheduledDate.Year == thisYear)
+            };
+
+            // Calculate average rating from reviews
+            var bookingIds = bookings.Select(b => b.Id).ToList();
+            var reviews = await _unitOfWork.Repository<Review>().ListAsync(
+                filter: r => bookingIds.Contains(r.BookingId),
+                orderBy: null,
+                includeProperties: null);
+
+            statistics.AverageRating = reviews.Any() ? (decimal)reviews.Average(r => r.Rating) : 0;
+
+            // Get top services
+            var topServices = bookings
+                .Where(b => b.Status == BookingStatus.Completed)
+                .GroupBy(b => new { b.ServiceId, b.Service.Name })
+                .Select(g => new ServiceUsageStats
+                {
+                    ServiceId = g.Key.ServiceId,
+                    ServiceName = g.Key.Name,
+                    BookingCount = g.Count(),
+                    TotalSpent = g.Sum(b => b.TotalAmount),
+                    LastUsed = g.Max(b => b.ScheduledDate)
+                })
+                .OrderByDescending(s => s.BookingCount)
+                .Take(5)
+                .ToList();
+
+            var response = new CustomerBookingHistoryResponse
+            {
+                RecentBookings = recentBookingResponses,
+                Statistics = statistics,
+                TopServices = topServices
+            };
+
+            return new AppResponse<CustomerBookingHistoryResponse>()
+                .SetSuccessResponse(response, "Success", "Booking history retrieved successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting booking history for CustomerId {CustomerId}", customerId);
+            return new AppResponse<CustomerBookingHistoryResponse>()
+                .SetErrorResponse("Error", $"Failed to get booking history: {ex.Message}");
+        }
+    }
+
+    public async Task<AppResponse<List<BookingSummaryResponse>>> GetCustomerUpcomingBookingsAsync(int customerId, int days = 30, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            _logger.LogInformation("Getting upcoming bookings for CustomerId {CustomerId} for next {Days} days", customerId, days);
+
+            var startDate = DateTime.UtcNow.Date;
+            var endDate = startDate.AddDays(days);
+
+            var bookings = await _unitOfWork.Repository<Booking>().ListAsync(
+                filter: b => b.CustomerId == customerId && 
+                            b.ScheduledDate >= startDate && 
+                            b.ScheduledDate <= endDate &&
+                            (b.Status == BookingStatus.Pending || 
+                             b.Status == BookingStatus.Confirmed || 
+                             b.Status == BookingStatus.InProgress),
+                orderBy: q => q.OrderBy(b => b.ScheduledDate).ThenBy(b => b.ScheduledTime),
+                includeProperties: q => q.Include(b => b.Customer)
+                    .ThenInclude(c => c.User)
+                    .Include(b => b.Service)
+                    .Include(b => b.ServicePackage)
+                    .Include(b => b.Staff)
+                    .ThenInclude(s => s.User));
+
+            var bookingResponses = _mapper.Map<List<BookingSummaryResponse>>(bookings);
+
+            // Add additional fields for upcoming bookings
+            foreach (var booking in bookingResponses)
+            {
+                var originalBooking = bookings.First(b => b.Id == booking.Id);
+                booking.CanCancel = CanBookingBeCancelled(originalBooking);
+                booking.CanReschedule = CanBookingBeRescheduled(originalBooking);
+                
+                // Calculate days until service
+                var serviceDate = originalBooking.ScheduledDate.Date;
+                booking.DaysUntilService = (int)(serviceDate - DateTime.UtcNow.Date).TotalDays;
+                
+                // Check if reminder was sent (you might want to add this field to your booking model)
+                booking.ReminderSent = false; // Implement based on your reminder system
+            }
+
+            return new AppResponse<List<BookingSummaryResponse>>()
+                .SetSuccessResponse(bookingResponses, "Success", "Upcoming bookings retrieved successfully");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting upcoming bookings for CustomerId {CustomerId}", customerId);
+            return new AppResponse<List<BookingSummaryResponse>>()
+                .SetErrorResponse("Error", $"Failed to get upcoming bookings: {ex.Message}");
+        }
+    }
+
+    // Helper methods for business logic
+    private bool CanBookingBeCancelled(Booking booking)
+    {
+        // Business rules for cancellation
+        if (booking.Status == BookingStatus.Completed || booking.Status == BookingStatus.Cancelled)
+            return false;
+
+        // Can't cancel if service is in progress
+        if (booking.Status == BookingStatus.InProgress)
+            return false;
+
+        // Can't cancel if service is within 2 hours (adjust as needed)
+        var serviceDateTime = booking.ScheduledDate.Add(booking.ScheduledTime);
+        var hoursUntilService = (serviceDateTime - DateTime.UtcNow).TotalHours;
+        
+        return hoursUntilService > 2;
+    }
+
+    private bool CanBookingBeRescheduled(Booking booking)
+    {
+        // Business rules for rescheduling
+        if (booking.Status == BookingStatus.Completed || booking.Status == BookingStatus.Cancelled)
+            return false;
+
+        // Can't reschedule if service is in progress
+        if (booking.Status == BookingStatus.InProgress)
+            return false;
+
+        // Can't reschedule if service is within 4 hours (adjust as needed)
+        var serviceDateTime = booking.ScheduledDate.Add(booking.ScheduledTime);
+        var hoursUntilService = (serviceDateTime - DateTime.UtcNow).TotalHours;
+        
+        return hoursUntilService > 4;
+    }
 }
 
 // Extension method for combining expressions
