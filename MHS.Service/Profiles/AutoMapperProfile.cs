@@ -50,7 +50,12 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Staff, opt => opt.MapFrom(src => src.Staff))
             .ForMember(dest => dest.Payment, opt => opt.MapFrom(src => src.Payment))
             .ForMember(dest => dest.Review, opt => opt.MapFrom(src => src.Review))
-            .ForMember(dest => dest.BookingImages, opt => opt.MapFrom(src => src.BookingImages));
+            .ForMember(dest => dest.BookingImages, opt => opt.MapFrom(src => src.BookingImages))
+            .ForMember(dest => dest.TotalPrice, opt => opt.MapFrom(src => src.TotalAmount))
+            .ForMember(dest => dest.CanCancel, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.CanReschedule, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.DaysUntilService, opt => opt.Ignore()) // Set manually in service
+            .ForMember(dest => dest.ReminderSent, opt => opt.Ignore()); // Set manually in service
 
         CreateMap<BookingImage, BookingImageResponse>();
 

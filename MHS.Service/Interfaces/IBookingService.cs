@@ -12,6 +12,11 @@ public interface IBookingService
     Task<AppResponse<BookingResponse>> UpdateBookingAsync(int id, UpdateBookingRequest request, CancellationToken cancellationToken = default);
     Task<AppResponse<string>> CancelBookingAsync(int id, string reason, CancellationToken cancellationToken = default);
     
+    // Enhanced customer booking operations
+    Task<AppResponse<List<BookingSummaryResponse>>> GetCustomerBookingsAsync(CustomerBookingListRequest request, CancellationToken cancellationToken = default);
+    Task<AppResponse<CustomerBookingHistoryResponse>> GetCustomerBookingHistoryAsync(int customerId, CancellationToken cancellationToken = default);
+    Task<AppResponse<List<BookingSummaryResponse>>> GetCustomerUpcomingBookingsAsync(int customerId, int days = 30, CancellationToken cancellationToken = default);
+    
     // Staff operations
     Task<AppResponse<string>> RespondToBookingAsync(int userId, StaffResponseRequest request, CancellationToken cancellationToken = default);
     Task<AppResponse<string>> CheckInAsync(int userId, CheckInRequest request, CancellationToken cancellationToken = default);

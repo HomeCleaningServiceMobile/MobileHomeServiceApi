@@ -91,6 +91,67 @@ public class BookingListRequest
     public int PageSize { get; set; } = 10;
 }
 
+// Enhanced customer-specific booking list request
+public class CustomerBookingListRequest
+{
+    public BookingStatus? Status { get; set; }
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public int? ServiceId { get; set; }
+    public string? ServiceName { get; set; }
+    public string? SearchTerm { get; set; } // Search in booking number, service name, address
+    public BookingSortBy SortBy { get; set; } = BookingSortBy.ScheduledDate;
+    public SortDirection SortDirection { get; set; } = SortDirection.Descending;
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public int? CustomerId { get; set; } // Will be set automatically by controller
+}
+
+public enum BookingSortBy
+{
+    ScheduledDate,
+    CreatedDate,
+    BookingNumber,
+    ServiceName,
+    Status,
+    TotalPrice
+}
+
+public enum SortDirection
+{
+    Ascending,
+    Descending
+}
+
+// Customer booking history response with statistics
+public class CustomerBookingHistoryResponse
+{
+    public List<BookingResponse> RecentBookings { get; set; } = new();
+    public BookingStatistics Statistics { get; set; } = new();
+    public List<ServiceUsageStats> TopServices { get; set; } = new();
+}
+
+public class BookingStatistics
+{
+    public int TotalBookings { get; set; }
+    public int CompletedBookings { get; set; }
+    public int CancelledBookings { get; set; }
+    public int PendingBookings { get; set; }
+    public decimal TotalSpent { get; set; }
+    public decimal AverageRating { get; set; }
+    public int BookingsThisMonth { get; set; }
+    public int BookingsThisYear { get; set; }
+}
+
+public class ServiceUsageStats
+{
+    public int ServiceId { get; set; }
+    public string ServiceName { get; set; } = string.Empty;
+    public int BookingCount { get; set; }
+    public decimal TotalSpent { get; set; }
+    public DateTime LastUsed { get; set; }
+}
+
 // Response DTOs
 public class BookingResponse
 {
@@ -135,4 +196,11 @@ public class BookingImageResponse
 public class BookingSummaryResponse : BookingResponse
 {
     // Simplified version without related entities for list views
+    
+    // Customer-specific fields
+    public bool CanCancel { get; set; }
+    public bool CanReschedule { get; set; }
+    public int? DaysUntilService { get; set; }
+    public bool ReminderSent { get; set; }
+    public decimal TotalPrice { get; set; } // Alias for TotalAmount for consistency
 } 
