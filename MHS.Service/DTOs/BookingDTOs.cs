@@ -182,6 +182,36 @@ public class BookingResponse
     public ReviewResponse? Review { get; set; }
     public List<BookingImageResponse> BookingImages { get; set; } = new();
 }
+public class BookingResponse1
+{
+    public int Id { get; set; }
+    public string BookingNumber { get; set; } = string.Empty;
+    public BookingStatus Status { get; set; }
+    public DateTime ScheduledDate { get; set; }
+    public TimeSpan ScheduledTime { get; set; }
+    public int EstimatedDurationMinutes { get; set; }
+    public decimal TotalAmount { get; set; }
+    public decimal? FinalAmount { get; set; }
+    public string ServiceAddress { get; set; } = string.Empty;
+    public string? SpecialInstructions { get; set; }
+    public string? Notes { get; set; }
+    public DateTime? StartedAt { get; set; }
+    public DateTime? CompletedAt { get; set; }
+    public DateTime? CancelledAt { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public decimal AddressLatitude { get; set; }
+    public decimal AddressLongitude { get; set; }
+
+    // Related entities
+    public CustomerResponse Customer { get; set; } = null!;
+    public ServiceResponse Service { get; set; } = null!;
+    public ServicePackageResponse? ServicePackage { get; set; }
+    public StaffResponse? BookingStaff { get; set; }
+    public PaymentResponse? Payment { get; set; }
+    public ReviewResponse? Review { get; set; }
+    public List<BookingImageResponse> BookingImages { get; set; } = new();
+}
+
 
 public class BookingImageResponse
 {
@@ -193,7 +223,7 @@ public class BookingImageResponse
     public string? TakenBy { get; set; }
 }
 
-public class BookingSummaryResponse : BookingResponse
+public class BookingSummaryResponse : BookingResponse1
 {
     // Simplified version without related entities for list views
     

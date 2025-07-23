@@ -47,7 +47,7 @@ public class AutoMapperProfile : Profile
             .ForMember(dest => dest.Customer, opt => opt.MapFrom(src => src.Customer))
             .ForMember(dest => dest.Service, opt => opt.MapFrom(src => src.Service))
             .ForMember(dest => dest.ServicePackage, opt => opt.MapFrom(src => src.ServicePackage))
-            .ForMember(dest => dest.Staff, opt => opt.MapFrom(src => src.Staff))
+            .ForMember(dest => dest.BookingStaff, opt => opt.MapFrom(src => src.Staff))
             .ForMember(dest => dest.Payment, opt => opt.MapFrom(src => src.Payment))
             .ForMember(dest => dest.Review, opt => opt.MapFrom(src => src.Review))
             .ForMember(dest => dest.BookingImages, opt => opt.MapFrom(src => src.BookingImages))
