@@ -122,7 +122,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <returns>User profile information</returns>
     [HttpGet("profile")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> GetProfile()
     {
         try
@@ -282,7 +282,7 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <returns>Success result</returns>
     [HttpPost("logout")]
-    [Authorize]
+    //[Authorize]
     public async Task<IActionResult> Logout()
     {
         try
